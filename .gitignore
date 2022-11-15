@@ -1,0 +1,5 @@
+vendor/raylib-source
+build
+bin
+.vs
+*.vcxproj*
