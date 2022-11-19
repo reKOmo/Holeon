@@ -1,5 +1,5 @@
-vendor/raylib-source
-build
+raylib-source
+bin-obj
 bin
 .vs
 *.vcxproj*

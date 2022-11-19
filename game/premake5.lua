@@ -6,6 +6,11 @@ project (workspaceName)
     location "../game"
     targetdir "../bin/%{cfg.buildcfg}"
 	objdir "../bin-obj/%{cfg.buildcfg}"
+
+	filter "configurations:Debug"
+		defines {
+			"HOLO_DEV"
+		}
 	
     filter "configurations:Release"
 		kind "WindowedApp"
@@ -26,7 +31,12 @@ project (workspaceName)
 	}
 	files {"**.c", "**.cpp", "**.h", "**.hpp"}
 
-	includedirs { "./", "src", "include"}
+	includedirs {
+		"./",
+		"src",
+		"include",
+		"../vendor/entt/include"
+	}
 	link_raylib();
 	
 	-- To link to a lib use link_to("LIB_FOLDER_NAME")
