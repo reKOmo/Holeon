@@ -9,20 +9,24 @@ namespace Engine {
 			TextureManager() : m_NumOfTextures(0), m_Textures(std::make_unique<Texture[]>(1)) {};
 			~TextureManager();
 			void loadFiles(char* files[], int n);
-			Texture* getTexture(int id);
+			Texture* getTexture(int index);
 		private:
 			std::unique_ptr<Texture[]> m_Textures;
 			int m_NumOfTextures;
 
 		};
 
-		struct Material {
-			int textureId;
-			Rectangle plot;	// {origin_x, origin_y, width, height}
-
-			Material() = default;
+		class Material {
+		private:
+			Texture* textureId = nullptr;
+			Rectangle baseTilePlot;	// {origin_x, origin_y, width, height}
+		
+		public:
+			Material();
 			Material(const Material&) = default;
-			Material(int id, Rectangle p) : textureId(id), plot(p) {}
+			Material(Texture* id, Rectangle p) : textureId(id), plot(p) {}
+
+			Rectangle getPlotByIndex(int index);
 		};
 
 	}

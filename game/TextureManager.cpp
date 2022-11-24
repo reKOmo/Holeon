@@ -32,4 +32,10 @@ namespace Engine {
 		return a;
 	}
 
+	Renderer::Material::getPlotByIndex(int index) {
+		int x = (index * baseTilePlot.width) % textureId->width;
+		int y = baseTilePlot.height * (index / (textureId->width / baseTilePlot.width));
+		return {}
+	}
+
 }
