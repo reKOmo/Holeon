@@ -1,6 +1,9 @@
 #pragma once
 #include "raylib.h"
 #include "Renderer.h"
+#include "Script.h"
+#include "TerrainMap.h"
+#include <memory.h>
 
 namespace Engine {
 	namespace Components {
@@ -22,6 +25,28 @@ namespace Engine {
 			SpriteComponent() = default;
 			SpriteComponent(const SpriteComponent&) = default;
 			SpriteComponent(Renderer::Material m, Vector2 scale = { 1.0f }, Vector2 o = {0.0, 0.0}, Color t = WHITE) : Material(m), Scale(scale), origin(o), tint(t) {}
+		};
+
+		struct TerrainComponent {
+			Renderer::Material material;
+			TerrainMap map;
+
+			TerrainComponent() = default;
+			TerrainComponent(const TerrainComponent&) = default;
+			TerrainComponent(Renderer::Material m, TerrainMap& map) : material(m), map(map) {}
+		};
+
+		struct ScriptComponent {
+			Script* instance = nullptr;
+			
+			Script*(*createFunction)();
+			void(*destroyFunction)(ScriptComponent*);
+
+			template<typename T>
+			void bind() {
+				createFunction = []() { return static_cast<Script*>(new T()); };
+				destroyFunction = [](ScriptComponent* comp) { delete comp->instance; comp->instance = nullptr; };
+			}
 		};
 	}
 }

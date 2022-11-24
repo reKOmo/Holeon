@@ -3,13 +3,14 @@
 
 namespace Engine {
 	Renderer::TextureManager::~TextureManager() {
-		printf("Unloading textures");
+		printf("Unloading textures...");
 		for (int i = 0; i < m_NumOfTextures; i++) {
 			UnloadTexture(m_Textures[i]);
 		}
 	}
 
 	void Renderer::TextureManager::loadFiles(char* files[], int n) {
+		printf("Loading textures...");
 		//unload old textures
 		for (int i = 0; i < m_NumOfTextures; i++) {
 			UnloadTexture(m_Textures[i]);
@@ -20,6 +21,8 @@ namespace Engine {
 		for (int i = 0; i < n; i++) {
 			m_Textures[i] = LoadTexture(files[i]);
 		}
+
+		printf("Loaded %d textures", n);
 
 	}
 
