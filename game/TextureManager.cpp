@@ -3,7 +3,7 @@
 
 namespace Engine {
 	Renderer::TextureManager::~TextureManager() {
-		printf("Unloading textures...");
+		printf("Unloading textures...\n");
 		for (int i = 0; i < m_NumOfTextures; i++) {
 			UnloadTexture(m_Textures[i]);
 		}
@@ -17,25 +17,29 @@ namespace Engine {
 		}
 		m_Textures.reset();
 
-		m_Textures = std::make_unique<Texture[]>(n);
+		m_Textures = std::make_unique<raylib::Texture[]>(n);
+		m_NumOfTextures = n;
 		for (int i = 0; i < n; i++) {
 			m_Textures[i] = LoadTexture(files[i]);
 		}
 
-		printf("Loaded %d textures", n);
+		printf("Loaded %d textures\n", m_NumOfTextures);
 
 	}
 
-	Texture* Renderer::TextureManager::getTexture(int id) {
+	raylib::Texture* Renderer::TextureManager::getTexture(int id) {
 		if (id < 0 || id > m_NumOfTextures) return nullptr;
-		Texture* a = &m_Textures[id];
+		raylib::Texture* a = &m_Textures[id];
 		return a;
 	}
 
-	Renderer::Material::getPlotByIndex(int index) {
-		int x = (index * baseTilePlot.width) % textureId->width;
-		int y = baseTilePlot.height * (index / (textureId->width / baseTilePlot.width));
-		return {}
+	Rectangle Renderer::getPlotByIndex(int index, Engine::Renderer::Material& mat) {
+		const int numOfTiles = mat.texture->width / mat.tilePlot.width;
+		int x = index % numOfTiles;
+		int y = index / numOfTiles;
+		return { (float)(x * mat.tilePlot.width), (float)(y * mat.tilePlot.height), (float)mat.tilePlot.width, (float)mat.tilePlot.height };
 	}
+
+	
 
 }

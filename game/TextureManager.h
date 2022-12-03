@@ -1,33 +1,31 @@
 #pragma once
 #include <memory>
-#include "raylib.h"
+#include "raylib-cpp.hpp"
 
 namespace Engine {
 	namespace Renderer {
 		class TextureManager {
 		public:
-			TextureManager() : m_NumOfTextures(0), m_Textures(std::make_unique<Texture[]>(1)) {};
+			TextureManager() : m_NumOfTextures(0), m_Textures(std::make_unique<raylib::Texture[]>(1)) {};
 			~TextureManager();
 			void loadFiles(char* files[], int n);
-			Texture* getTexture(int index);
+			raylib::Texture* getTexture(int index);
 		private:
-			std::unique_ptr<Texture[]> m_Textures;
+			std::unique_ptr<raylib::Texture[]> m_Textures;
 			int m_NumOfTextures;
 
 		};
 
-		class Material {
-		private:
-			Texture* textureId = nullptr;
-			Rectangle baseTilePlot;	// {origin_x, origin_y, width, height}
-		
-		public:
-			Material();
+		struct Material {
+			Texture* texture = nullptr;
+			Rectangle tilePlot = {};	// {origin_x, origin_y, width, height}
+			
+			Material() {}
 			Material(const Material&) = default;
-			Material(Texture* id, Rectangle p) : textureId(id), plot(p) {}
-
-			Rectangle getPlotByIndex(int index);
+			Material(raylib::Texture* id, raylib::Rectangle p) : texture(id), tilePlot(p) {}
 		};
+
+		Rectangle getPlotByIndex(int index, Engine::Renderer::Material& mat);
 
 	}
 }

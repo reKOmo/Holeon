@@ -1,5 +1,5 @@
 #pragma once
-#include "raylib.h"
+#include "raylib-cpp.hpp"
 #include "TextureManager.h"
 #include "entt.hpp"
 #include "Entity.h"

@@ -30,9 +30,15 @@ namespace Engine {
 			m_Scene->remove<T>(m_EnttID);
 		}
 
+		operator bool() const {
+			return m_EnttID != entt::null;
+		}
+		bool operator ==(const Entity& other) const {
+			return m_EnttID == other.m_EnttID;
+		}
 
 	private:
-		entt::entity m_EnttID = (entt::entity)0;
+		entt::entity m_EnttID = entt::null;
 		entt::registry* m_Scene = nullptr;
 		friend class Scene;
 	};

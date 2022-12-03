@@ -1,3 +1,6 @@
-#include "Engine.h"
+#include "Entity.h"
+#include "Components.h"
 
-Engine::Entity::Entity(entt::entity id, entt::registry* reg) : m_EnttID(id), m_Scene(reg) {}
+namespace Engine {
+	Entity::Entity(entt::entity id, entt::registry* reg) : m_EnttID(id), m_Scene(reg) {}
+}
