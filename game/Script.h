@@ -4,6 +4,8 @@
 
 namespace Engine {
 	class Script {
+	public:
+	virtual ~Script();
 	protected:
 		Engine::Entity m_Owner;
 		virtual void onCreate() {}

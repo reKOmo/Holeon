@@ -39,6 +39,10 @@ namespace Engine{
 	}
 
 	void Scene::update() {
+		/*
+			1. Update scripts
+			2. Update animations
+		*/
 		m_Registry.view<Components::ScriptComponent>().each([=](auto ent, auto &script) {
 			if (!script.instance) {
 				script.instance = script.createFunction();
@@ -48,6 +52,8 @@ namespace Engine{
 			}
 			script.instance->onUpdate(GetFrameTime());
 		});
+
+		Engine::Animator::updateAnimations(m_Registry, GetFrameTime());
 	}
 
 	void Scene::render() {

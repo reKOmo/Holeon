@@ -77,5 +77,19 @@ namespace Engine {
 			InfoComponent(const InfoComponent&) = default;
 			InfoComponent(std::string n) : name(n) {}
 		};
+
+		struct AnimationManager {
+			std::shared_ptr<Engine::AnimationClip>[] animations;
+			std::vector<std::shared_ptr<Engine::AnimationClip>> currentlyPlaying;
+
+			void playAnimation(int index) {
+				currentlyPlaying.push_back(animations[index]);
+			}
+
+			template<typename T>
+			void playAnimation() {
+				currentlyPlaying.push_back(make_shared<T>());
+			}
+		};
 	}
 }
