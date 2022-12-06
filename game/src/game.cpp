@@ -116,11 +116,31 @@ int main(void) {
         }
     };
 
+    class SwordAnimation : Engine::AnimationClip {
+        void onCreate() {
+            loop = true;
+            sword = getEntityByName("sword");
+        }
+        void onInit() {
+            //create tweeny animation
+        }
+        void onUpdate(float delta) {
+            sword.getComponent<Engine::Components::TransformComponent>.rotation += angle;
+        }
+        private:
+        float angle = 0.02;
+        Engine::Entity sword;
+    };
+
     cam.addComponent<Engine::Components::ScriptComponent>().bind<CameraController>();
     ent.addComponent<Engine::Components::ScriptComponent>().bind<PlayerController>();
     sword2.addComponent<Engine::Components::ScriptComponent>().bind<PlayerController2>();
 
-
+    auto& animManag = ent.addComponent<Engine::Components::AnimationManager>();
+    animManag.animations = new Engine::AnimationClip[1]{
+        std::make_shared<SwordAnimation>()
+    };
+    
     auto terrain = scene.createEntity();
     Engine::TerrainMap map;
     map.loadMap(RESOURCE_PATH("Holeon - test map 1.csv"));

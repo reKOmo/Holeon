@@ -93,6 +93,10 @@ namespace Engine {
 			void playAnimation() {
 				currentlyPlaying.push_back(make_shared<T>());
 			}
+
+			~AnimationManager() {
+				delete[] animations;
+			}
 		};
 	}
 }
