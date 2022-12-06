@@ -5,6 +5,7 @@
 #include "TerrainMap.h"
 #include <memory.h>
 #include "Engine.h"
+#include "AnimationClip.h"
 
 namespace Engine {
 	namespace Components {
@@ -79,10 +80,12 @@ namespace Engine {
 		};
 
 		struct AnimationManager {
-			std::shared_ptr<Engine::AnimationClip>[] animations;
+			std::shared_ptr<Engine::AnimationClip>* animations;
+			int animationsSize = 0;
 			std::vector<std::shared_ptr<Engine::AnimationClip>> currentlyPlaying;
 
 			void playAnimation(int index) {
+				if (index > animationsSize || index < 0) return;
 				currentlyPlaying.push_back(animations[index]);
 			}
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "Script.h"
+#include "Animator.h"
 
 namespace Engine {
     class AnimationClip : public Script {
@@ -16,5 +17,5 @@ namespace Engine {
         double currentPlaytime = 0;
         friend void Engine::Animator::updateAnimations(entt::registry& scene, float delta);
 
-    }
+    };
 }
