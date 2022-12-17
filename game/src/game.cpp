@@ -15,40 +15,45 @@ int main(void) {
         RESOURCE_PATH("basic_sword.png"),
         RESOURCE_PATH("Holeon-tileset.png"),
         RESOURCE_PATH("Grass.png"),
+        RESOURCE_PATH("player_forward.png"),
+        RESOURCE_PATH("dialog-frame.png")
     };
 
     Engine::Renderer::TextureManager textureMgr;
-    textureMgr.loadFiles(files, 3);
+    textureMgr.loadFiles(files, 5);
 
     Engine::Scene scene(&textureMgr);
 
 
-    auto ent = scene.createEntity("sword");
-    Engine::Renderer::Material swordMaterial = { textureMgr.getTexture(0), {0.0, 0.0, 32.0, 32.0} };
-    ent.addComponent<Engine::Components::SpriteComponent>(swordMaterial);
-    auto& swordTrans = ent.addComponent<Engine::Components::TransformComponent>();
-    swordTrans.Position = { 0.0, 0.0 };
-
-    auto sword2 = scene.createEntity("sword2");
-    Engine::Renderer::Material grassMat = { textureMgr.getTexture(2), {0.0, 0.0, 32.0, 32.0} };
-    auto& grassSprite = sword2.addComponent<Engine::Components::SpriteComponent>(grassMat);
-    grassSprite.zIndex = 2;
-    auto& swordTrans2 = sword2.addComponent<Engine::Components::TransformComponent>();
-    swordTrans2.Position = { 40.0, 40.0 };
-    auto& infoSword = sword2.getComponent<Engine::Components::InfoComponent>();
-    infoSword.parent = ent;
-
-    auto cam = scene.createEntity("NotCamera");
-    auto& camComp = cam.addComponent<raylib::Camera2D>();
-    camComp.target = { 0.0, 0.0 };
-    camComp.offset = { -16.0, -16.0 };
-    camComp.zoom = 0.5;
-    camComp.rotation = 0.0;
-
-    scene.setCamera(cam);
+    class SpriteAnimator : public Engine::AnimationClip {
+    public:
+        SpriteAnimator() {}
+        SpriteAnimator(int fps) {
+            frameTime = 1.0 / (float)fps;
+        }
+        void onCreate() {
+            loop = true;
+            duration = -1;
+        }
+        void onUpdate(float delta) {
+            sinceLastFrame += delta;
+            if (sinceLastFrame >= frameTime) {
+                auto& sprite = m_Owner.getComponent<Engine::Components::SpriteComponent>();
+                sprite.imageIndex = (sprite.imageIndex + 1) % sprite.totalFrames;
+                sinceLastFrame = 0;
+            }
+        }
+    private:
+        float sinceLastFrame = 0;
+        float frameTime = 0.081;
+    };
 
     class PlayerController : public Engine::Script {
         void onCreate() {
+            auto& anim = m_Owner.getComponent<Engine::Components::AnimationManager>();
+            currentAnimId = anim.playAnimation(0, []() {
+                printf("Stopped animation");
+            });
         }
         void onUpdate(float delta) {
             auto& trans = m_Owner.getComponent<Engine::Components::TransformComponent>();
@@ -57,37 +62,23 @@ int main(void) {
             if (IsKeyDown(KEY_D)) trans.Position.x += speed;
             if (IsKeyDown(KEY_W)) trans.Position.y -= speed;
             if (IsKeyDown(KEY_S)) trans.Position.y += speed;
-        }
-        void onDestroy() {
-           
-        }
-    };
-
-    class PlayerController2 : public Engine::Script {
-        void onCreate() {
-        }
-        void onUpdate(float delta) {
-            auto& trans = m_Owner.getComponent<Engine::Components::TransformComponent>();
-            const float speed = 200.0 * delta;
-            if (IsKeyDown(KEY_LEFT)) trans.Position.x -= speed;
-            if (IsKeyDown(KEY_RIGHT)) trans.Position.x += speed;
-            if (IsKeyDown(KEY_UP)) trans.Position.y -= speed;
-            if (IsKeyDown(KEY_DOWN)) trans.Position.y += speed;
+            if (IsKeyDown(KEY_SPACE) && currentAnimId != -1) {
+                printf("%d\n", currentAnimId);
+                auto& anim = m_Owner.getComponent<Engine::Components::AnimationManager>();
+                anim.stopAnimation(currentAnimId);
+                currentAnimId = -1;
+            }
         }
         void onDestroy() {
 
         }
+    private: 
+        int currentAnimId = -1;
     };
-
 
     class CameraController : public Engine::Script {
     public:
         void onCreate() {
-            auto& ent = getEntityByName("sword");
-            std::cout << ent.getComponent<Engine::Components::InfoComponent>().name << "\n";
-            auto& m_camComp = m_Owner.getComponent<raylib::Camera2D>();
-            m_camComp.offset = { (float)screenWidth / 2.0f, (float)screenHeight / 2.0f };
-            auto& tag = m_Owner.getComponent<Engine::Components::InfoComponent>();
         }
         void onUpdate(float delta) {
             auto& m_camComp = m_Owner.getComponent<raylib::Camera2D>();
@@ -116,31 +107,31 @@ int main(void) {
         }
     };
 
-    class SwordAnimation : Engine::AnimationClip {
-        void onCreate() {
-            loop = true;
-            sword = getEntityByName("sword");
-        }
-        void onInit() {
-            //create tweeny animation
-        }
-        void onUpdate(float delta) {
-            sword.getComponent<Engine::Components::TransformComponent>.rotation += angle;
-        }
-        private:
-        float angle = 0.02;
-        Engine::Entity sword;
+    auto player = scene.createEntity("player");
+    Engine::Renderer::Material playerMaterial = { textureMgr.getTexture(3), {0.0, 0.0, 32.0, 32.0} };
+    auto& animSprite = player.addComponent<Engine::Components::SpriteComponent>(playerMaterial);
+    auto& transform = player.addComponent<Engine::Components::TransformComponent>();
+    transform.Position = { 0.0, 0.0 };
+    player.addComponent<Engine::Components::ScriptComponent>().bind<PlayerController>();
+    auto& animManag = player.addComponent<Engine::Components::AnimationManager>();
+    const int numOfAnims = 1;
+    animManag.animations = new std::shared_ptr<Engine::AnimationClip>[numOfAnims] {
+        std::make_shared<SpriteAnimator>(12)
     };
+    animManag.animationsSize = numOfAnims;
 
+
+    auto cam = scene.createEntity("NotCamera");
+    auto& camComp = cam.addComponent<raylib::Camera2D>();
+    camComp.target = { 0.0, 0.0 };
+    camComp.offset = { 200.0, 100.0 };
+    camComp.zoom = 0.5;
+    camComp.rotation = 0.0;
     cam.addComponent<Engine::Components::ScriptComponent>().bind<CameraController>();
-    ent.addComponent<Engine::Components::ScriptComponent>().bind<PlayerController>();
-    sword2.addComponent<Engine::Components::ScriptComponent>().bind<PlayerController2>();
 
-    auto& animManag = ent.addComponent<Engine::Components::AnimationManager>();
-    animManag.animations = new Engine::AnimationClip[1]{
-        std::make_shared<SwordAnimation>()
-    };
-    
+    scene.setCamera(cam);
+
+
     auto terrain = scene.createEntity();
     Engine::TerrainMap map;
     map.loadMap(RESOURCE_PATH("Holeon - test map 1.csv"));
@@ -149,6 +140,17 @@ int main(void) {
     terrain.addComponent<Engine::Components::TerrainComponent>(terrainMat, map);
     auto& terrainTrans = terrain.addComponent<Engine::Components::TransformComponent>();
     terrainTrans.Position = { 0.0, 0.0 };
+
+
+    auto uiBg = scene.createEntity("uibg");
+    auto& uiTrans = uiBg.addComponent<Engine::Components::TransformComponent>();
+    uiTrans.Position = { 0.0, 0.0 };
+    Engine::Renderer::Material dialogFrame = { textureMgr.getTexture(4), { 0.0, 0.0, 12.0, 12.0 } };
+    auto& bg = uiBg.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
+    bg.size = { 62.0, 32.0 };
+    float scale = 4.0;
+    bg.scale = { scale, scale };
+
 
     
 

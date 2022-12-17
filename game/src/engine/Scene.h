@@ -2,7 +2,8 @@
 
 #include "entt.hpp"
 #include "Entity.h"
-#include "Renderer.h"
+#include "Renderer2D.h"
+#include "UIRenderer.h"
 
 namespace Engine {
 	class Scene {
@@ -23,6 +24,7 @@ namespace Engine {
 
 	private:
 		entt::registry m_Registry;
-		Renderer::Renderer2D m_Renderer;
+		Renderer::Renderer2D m_Renderer2D;
+		Renderer::UIRenderer m_RendererUI;
 	};
 }

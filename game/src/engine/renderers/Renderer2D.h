@@ -18,9 +18,9 @@ namespace Engine {
 			
 			
 			void render();
-			void setCamera(Entity& c);
+			void setCamera(Engine::Entity& c);
 		private:
-			Entity* m_Camera = nullptr;
+			Engine::Entity* m_Camera = nullptr;
 			entt::registry* m_Registry;
 			TextureManager* m_TextureMgr;
 		};

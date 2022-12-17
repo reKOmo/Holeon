@@ -30,6 +30,14 @@ namespace Engine {
 			m_Scene->remove<T>(m_EnttID);
 		}
 
+		Engine::Entity getParent();
+		void setParent(Engine::Entity p);
+		const std::vector<Engine::Entity>& getChildren();
+
+		bool disabled();
+		void disable();
+		void enable();
+
 		operator bool() const {
 			return m_EnttID != entt::null;
 		}

@@ -10,7 +10,8 @@ namespace Engine {
 	}
 
 	void Renderer::TextureManager::loadFiles(char* files[], int n) {
-		printf("Loading textures...");
+		printf("Loading textures...\n");
+		int succLoads = 0;
 		//unload old textures
 		for (int i = 0; i < m_NumOfTextures; i++) {
 			UnloadTexture(m_Textures[i]);
@@ -21,9 +22,12 @@ namespace Engine {
 		m_NumOfTextures = n;
 		for (int i = 0; i < n; i++) {
 			m_Textures[i] = LoadTexture(files[i]);
+			if (m_Textures[i].height !=  0) {
+				succLoads++;
+			}
 		}
 
-		printf("Loaded %d textures\n", m_NumOfTextures);
+		printf("Loaded %d/%d textures\n", succLoads, m_NumOfTextures);
 
 	}
 
@@ -33,7 +37,7 @@ namespace Engine {
 		return a;
 	}
 
-	Rectangle Renderer::getPlotByIndex(int index, Engine::Renderer::Material& mat) {
+	raylib::Rectangle Renderer::getPlotByIndex(int index, Engine::Renderer::Material& mat) {
 		const int numOfTiles = mat.texture->width / mat.tilePlot.width;
 		int x = index % numOfTiles;
 		int y = index / numOfTiles;

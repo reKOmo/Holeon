@@ -17,15 +17,15 @@ namespace Engine {
 		};
 
 		struct Material {
-			Texture* texture = nullptr;
-			Rectangle tilePlot = {};	// {origin_x, origin_y, width, height}
+			raylib::Texture* texture = nullptr;
+			raylib::Rectangle tilePlot = {};	// {origin_x, origin_y, width, height}
 			
 			Material() {}
 			Material(const Material&) = default;
 			Material(raylib::Texture* id, raylib::Rectangle p) : texture(id), tilePlot(p) {}
 		};
 
-		Rectangle getPlotByIndex(int index, Engine::Renderer::Material& mat);
+		raylib::Rectangle getPlotByIndex(int index, Engine::Renderer::Material& mat);
 
 	}
 }

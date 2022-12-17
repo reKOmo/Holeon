@@ -1,28 +1,11 @@
-#include "Renderer.h"
+#include "Renderer2D.h"
 #include "Components.h"
-
-void getAbsoluteTransform(Engine::Components::InfoComponent& info, Engine::Components::TransformComponent& trans) {
-	if (info.parent) {
-		auto& t2 = info.parent.getComponent<Engine::Components::TransformComponent>();
-		trans.Position += t2.Position;
-		trans.Rotation += t2.Rotation;
-		getAbsoluteTransform(info.parent.getComponent<Engine::Components::InfoComponent>(), trans);
-	}
-}
-
-Engine::Components::TransformComponent getAbsoluteTransform(Engine::Entity& ent) {
-	auto& info = ent.getComponent<Engine::Components::InfoComponent>();
-	Engine::Components::TransformComponent t(ent.getComponent<Engine::Components::TransformComponent>());
-
-	getAbsoluteTransform(info, t);
-	
-	return t;
-}
+#include "raylib.hpp"
+#include "Renderer.h"
 
 void Engine::Renderer::Renderer2D::render() {
 	auto& cam = m_Camera->getComponent<raylib::Camera2D>();
 
-	BeginDrawing();
 	ClearBackground(WHITE);
 	BeginMode2D(cam);
 	//render terrain
@@ -58,13 +41,14 @@ void Engine::Renderer::Renderer2D::render() {
 		Entity e = { ent, m_Registry };
 		auto absTransform = getAbsoluteTransform(e);
 
+		raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
+
 		raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
 
 
-		DrawTexturePro(Texture(*sprite.material.texture), sprite.material.tilePlot, destination, sprite.origin, absTransform.Rotation, sprite.tint);
+		DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
 	}
 	EndMode2D();
-	EndDrawing();
 	
 }
 

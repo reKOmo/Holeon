@@ -33,7 +33,7 @@ project (workspaceName)
 
 	includedirs {
 		"./",
-		"src",
+		"src/**",
 		"include",
 		"../vendor/entt/include",
 		"../vendor/raylib-cpp/include"

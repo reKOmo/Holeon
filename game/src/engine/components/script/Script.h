@@ -8,6 +8,7 @@ namespace Engine {
 		virtual ~Script() {}
 	protected:
 		Engine::Entity m_Owner;
+		bool paused = false;
 		virtual void onCreate() {}
 		virtual void onUpdate(float delta) {}
 		virtual void onDestroy() {}

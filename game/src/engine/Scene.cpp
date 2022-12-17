@@ -4,7 +4,7 @@
 
 namespace Engine{
 	Scene::Scene(Renderer::TextureManager* mgr) {
-		m_Renderer = Renderer::Renderer2D(&m_Registry, mgr );
+		m_Renderer2D = Renderer::Renderer2D(&m_Registry, mgr );
 	}
 
 	Scene::~Scene() {
@@ -25,6 +25,13 @@ namespace Engine{
 		auto& comp = e.getComponent<Components::ScriptComponent>();
 		comp.instance->onDestroy();
 		comp.destroyFunction(&comp);
+
+		auto& children = e.getChildren();
+
+		for (auto c : children) {
+			removeEntity(c);
+		}
+
 		m_Registry.destroy(e.m_EnttID);
 	}
 
@@ -53,15 +60,18 @@ namespace Engine{
 			script.instance->onUpdate(GetFrameTime());
 		});
 
-		Engine::Animator::updateAnimations(m_Registry, GetFrameTime());
+		Engine::Systems::Animator::updateAnimations(m_Registry, GetFrameTime());
 	}
 
 	void Scene::render() {
-		m_Renderer.render();
+		BeginDrawing();
+		m_Renderer2D.render();
+		m_RendererUI.render(&m_Registry);
+		EndDrawing();
 	}
 
 	void Scene::setCamera(Entity& ent) {
-		m_Renderer.setCamera(ent);
+		m_Renderer2D.setCamera(ent);
 	}
 
 }
