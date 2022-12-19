@@ -3,8 +3,10 @@
 #include "Components.h"
 
 namespace Engine{
-	Scene::Scene(Renderer::TextureManager* mgr) {
-		m_Renderer2D = Renderer::Renderer2D(&m_Registry, mgr );
+	Scene::Scene(Renderer::TextureManager* mgr, Renderer::FontManager* fontmgr)
+		: m_FontManager(fontmgr), m_TextureManager(mgr)
+	{
+		m_Renderer2D = Renderer::Renderer2D(&m_Registry, mgr);
 	}
 
 	Scene::~Scene() {

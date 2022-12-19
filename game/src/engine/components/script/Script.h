@@ -13,6 +13,10 @@ namespace Engine {
 		virtual void onUpdate(float delta) {}
 		virtual void onDestroy() {}
 		Engine::Entity getEntityByName(std::string name);
+		/*
+			Lambda passed to this function should return entity that is highest in hiearchy
+		*/
+		Engine::Entity Instattiate(std::function<Engine::Entity(Engine::Scene* scene)>);
 	private:
 		Engine::Scene* m_Scene = nullptr;
 		friend class Scene;

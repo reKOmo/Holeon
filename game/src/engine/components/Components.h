@@ -58,6 +58,10 @@ namespace Engine {
 				createFunction = []() { return static_cast<Script*>(new T()); };
 				destroyFunction = [](ScriptComponent* comp) { delete comp->instance; comp->instance = nullptr; };
 			}
+
+			operator bool() const {
+				return instance != nullptr;
+			}
 		};
 
 		struct InfoComponent {

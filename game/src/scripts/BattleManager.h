@@ -11,5 +11,10 @@ public:
 	void onCreate();
 	void onUpdate(float);
 private:
-	int state = PLAYER_TURN;
+	BATTLE_STATE state = PLAYER_TURN;
+	Engine::Entity attackUI;
+	Engine::Entity player;
+	Engine::Entity opponent;
+	void playerTurn();
+	void damageTurn();
 };
