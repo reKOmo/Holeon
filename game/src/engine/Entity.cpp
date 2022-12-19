@@ -24,7 +24,7 @@ namespace Engine {
 		}
 		//set new parent
 		info.m_Parent = p;
-		info.m_Children.push_back(*this);
+		info.m_Parent.getComponent<Engine::Components::InfoComponent>().m_Children.push_back(*this);
 	}
 
 	void Entity::disable() {
@@ -35,7 +35,7 @@ namespace Engine {
 		getComponent<Engine::Components::InfoComponent>().disabled = false;
 	}
 
-	const std::vector<Engine::Entity>& Entity::getChildren() {
+	std::vector<Engine::Entity> Entity::getChildren() {
 		return getComponent<Engine::Components::InfoComponent>().m_Children;
 	}
 }

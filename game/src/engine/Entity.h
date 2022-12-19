@@ -8,7 +8,7 @@ namespace Engine {
 	public:
 		Entity() {};
 		Entity(entt::entity id, entt::registry* reg);
-		Entity(const Entity& other) = default;
+		Entity(const Entity& other) : m_EnttID(other.m_EnttID), m_Scene(other.m_Scene) {};
 
 		template<typename T>
 		T& getComponent() {
@@ -32,7 +32,7 @@ namespace Engine {
 
 		Engine::Entity getParent();
 		void setParent(Engine::Entity p);
-		const std::vector<Engine::Entity>& getChildren();
+		std::vector<Engine::Entity> getChildren();
 
 		bool disabled();
 		void disable();

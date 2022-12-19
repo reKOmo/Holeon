@@ -6,6 +6,7 @@
 #include <memory.h>
 #include "AnimationClip.h"
 #include "Helpers.h"
+#include <functional>
 
 namespace Engine {
 	namespace Components {
@@ -152,7 +153,7 @@ namespace Engine {
 			float spacing = 0.0;
 			float fontSize = 14.0;
 			raylib::Color color;
-			raylib::Font font = GetFontDefault();
+			raylib::Font* font = nullptr;
 			int zIndex = 0;
 
 			TextComponent() = default;
@@ -174,8 +175,12 @@ namespace Engine {
 			ButtonComponent(int v) : value(v) {}
 		};
 
-		struct ButtonManager {
-			Engine::Entity selectedButton = {};
+		struct ButtonManagerData {
+			Engine::Entity currentButton;
+
+			ButtonManagerData() = default;
+			ButtonManagerData(const ButtonManagerData&) = default;
+			ButtonManagerData(Engine::Entity v) : currentButton(v) {}
 		};
 
 	}

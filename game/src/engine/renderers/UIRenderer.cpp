@@ -9,11 +9,10 @@ Engine::Renderer::UIRenderer::UIRenderer() {
 
 void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 	//render all backgrounds
-	
 	auto backgrounds = registry->group<Engine::Components::BackgroundComponent>(entt::get<Engine::Components::TransformComponent>);
-	backgrounds.sort<Engine::Components::BackgroundComponent>([](const Engine::Components::BackgroundComponent& a, const Engine::Components::BackgroundComponent& b){
+	backgrounds.sort<Engine::Components::BackgroundComponent>([](const Engine::Components::BackgroundComponent& a, const Engine::Components::BackgroundComponent& b) {
 		return a.zIndex < b.zIndex;
-	});
+		});
 	for (const auto ent : backgrounds) {
 		auto& [background, transform] = backgrounds.get<Components::BackgroundComponent, Components::TransformComponent>(ent);
 
@@ -30,20 +29,21 @@ void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 		EndShaderMode();
 	}
 	
-	/*
 	//render all text
-	auto text = registry->group<Engine::Components::TextComponent>(entt::get<Engine::Components::TransformComponent>);
+	//auto text = registry->group<Engine::Components::TextComponent>(entt::get<Engine::Components::TransformComponent>);
+	auto text = registry->view<Engine::Components::TextComponent, Engine::Components::TransformComponent>();
+	/*
 	text.sort<Engine::Components::TextComponent>([](const Engine::Components::TextComponent& a, const Engine::Components::TextComponent& b) {
 		return a.zIndex < b.zIndex;
 	});
-
-	for (auto ent : text) {
+	*/
+	
+	for (const auto ent : text) {
 		auto& [textComp, transform] = text.get<Engine::Components::TextComponent, Engine::Components::TransformComponent>(ent);
 
 		Entity e = { ent, registry };
 		auto absTransform = getAbsoluteTransform(e);
 
-		DrawTextPro(textComp.font, textComp.text, absTransform.Position, textComp.origin, textComp.rotation, textComp.fontSize, textComp.spacing, textComp.color);
+		DrawTextPro((*textComp.font), textComp.text, absTransform.Position, textComp.origin, textComp.rotation, textComp.fontSize, textComp.spacing, textComp.color);
 	}
-	*/
 }

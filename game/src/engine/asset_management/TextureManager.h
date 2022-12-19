@@ -17,6 +17,7 @@ namespace Engine {
 		};
 
 		struct Material {
+			// this should be just the structy, becouse its only a copy and would result in better memeory access
 			raylib::Texture* texture = nullptr;
 			raylib::Rectangle tilePlot = {};	// {origin_x, origin_y, width, height}
 			

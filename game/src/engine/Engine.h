@@ -7,3 +7,4 @@
 #include "Entity.h"
 #include "Scene.h"
 #include "Script.h"
+#include "FontManager.h"
