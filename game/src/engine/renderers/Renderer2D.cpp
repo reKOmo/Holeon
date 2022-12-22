@@ -7,7 +7,6 @@ void Engine::Renderer::Renderer2D::render() {
 	if (m_Camera) {
 		auto& cam = m_Camera->getComponent<raylib::Camera2D>();
 
-		ClearBackground(WHITE);
 		BeginMode2D(cam);
 		//render terrain
 		auto terrainGruop = m_Registry->group<Engine::Components::TerrainComponent>(entt::get<Engine::Components::TransformComponent>);

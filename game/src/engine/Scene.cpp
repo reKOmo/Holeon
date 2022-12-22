@@ -52,14 +52,16 @@ namespace Engine{
 			1. Update scripts
 			2. Update animations
 		*/
-		m_Registry.view<Components::ScriptComponent>().each([=](auto ent, auto &script) {
+		m_Registry.view<Components::ScriptComponent, Engine::Components::InfoComponent>().each([=](auto ent, auto &script, auto &info) {
 			if (!script.instance) {
 				script.instance = script.createFunction();
 				script.instance->m_Owner = { ent, &m_Registry };
 				script.instance->m_Scene = this;
 				script.instance->onCreate();
 			}
-			script.instance->onUpdate(GetFrameTime());
+			if (!info.disabled) {
+				script.instance->onUpdate(GetFrameTime());
+			}
 		});
 
 		Engine::Systems::Animator::updateAnimations(m_Registry, GetFrameTime());
@@ -67,6 +69,7 @@ namespace Engine{
 
 	void Scene::render() {
 		BeginDrawing();
+		ClearBackground(WHITE);
 		m_Renderer2D.render();
 		m_RendererUI.render(&m_Registry);
 		EndDrawing();

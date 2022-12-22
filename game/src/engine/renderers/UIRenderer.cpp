@@ -9,29 +9,31 @@ Engine::Renderer::UIRenderer::UIRenderer() {
 
 void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 	//render all backgrounds
-	auto backgrounds = registry->group<Engine::Components::BackgroundComponent>(entt::get<Engine::Components::TransformComponent>);
+	auto backgrounds = registry->group<Engine::Components::BackgroundComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
 	backgrounds.sort<Engine::Components::BackgroundComponent>([](const Engine::Components::BackgroundComponent& a, const Engine::Components::BackgroundComponent& b) {
 		return a.zIndex < b.zIndex;
 		});
 	for (const auto ent : backgrounds) {
-		auto& [background, transform] = backgrounds.get<Components::BackgroundComponent, Components::TransformComponent>(ent);
+		auto [background, transform, info] = backgrounds.get(ent);
 
-		frameShader.SetValue(positionLocation, &background.size, SHADER_UNIFORM_VEC2);
-		BeginShaderMode(frameShader);
-		Entity e = { ent, registry };
-		auto absTransform = getAbsoluteTransform(e);
+		if (!info.disabled) {
+			frameShader.SetValue(positionLocation, &background.size, SHADER_UNIFORM_VEC2);
+			BeginShaderMode(frameShader);
+			Entity e = { ent, registry };
+			auto absTransform = getAbsoluteTransform(e);
 
-		raylib::Rectangle source = background.material.tilePlot;
+			raylib::Rectangle source = background.material.tilePlot;
 
-		raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, background.size.x * background.scale.x, background.size.y * background.scale.y };
+			raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, background.size.x * background.scale.x, background.size.y * background.scale.y };
 
-		DrawTexturePro(Texture(*background.material.texture), source, destination, background.origin, absTransform.Rotation, background.tint);
-		EndShaderMode();
+			DrawTexturePro(Texture(*background.material.texture), source, destination, background.origin, absTransform.Rotation, background.tint);
+			EndShaderMode();
+		}
 	}
 	
 	//render all text
 	//auto text = registry->group<Engine::Components::TextComponent>(entt::get<Engine::Components::TransformComponent>);
-	auto text = registry->view<Engine::Components::TextComponent, Engine::Components::TransformComponent>();
+	auto text = registry->group<Engine::Components::TextComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
 	/*
 	text.sort<Engine::Components::TextComponent>([](const Engine::Components::TextComponent& a, const Engine::Components::TextComponent& b) {
 		return a.zIndex < b.zIndex;
@@ -39,11 +41,13 @@ void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 	*/
 	
 	for (const auto ent : text) {
-		auto& [textComp, transform] = text.get<Engine::Components::TextComponent, Engine::Components::TransformComponent>(ent);
+		auto& [textComp, transform, info] = text.get(ent);
 
-		Entity e = { ent, registry };
-		auto absTransform = getAbsoluteTransform(e);
+		if (!info.disabled) {
+			Entity e = { ent, registry };
+			auto absTransform = getAbsoluteTransform(e);
 
-		DrawTextPro((*textComp.font), textComp.text, absTransform.Position, textComp.origin, textComp.rotation, textComp.fontSize, textComp.spacing, textComp.color);
+			DrawTextPro((*textComp.font), textComp.text, absTransform.Position, textComp.origin, textComp.rotation, textComp.fontSize, textComp.spacing, textComp.color);
+		}
 	}
 }

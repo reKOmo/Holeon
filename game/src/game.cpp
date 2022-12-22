@@ -6,6 +6,8 @@
 #include "ButtonManager.h"
 #include "BattleManager.h"
 #include "EntityStats.h"
+#include "GameUtils.h"
+
 
 
 
@@ -13,7 +15,8 @@ int main(void) {
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
-   InitWindow(screenWidth, screenHeight, "Holeon");
+    Engine::initHelpers();
+    InitWindow(screenWidth, screenHeight, "Holeon"); 
 
     char* files[] = {
         RESOURCE_PATH("basic_sword.png"),
@@ -64,6 +67,31 @@ int main(void) {
         0.2,
         Attack::ATK_BOOST
     };
+
+    raylib::Font* f = scene.m_FontManager->getFont(0);
+    const int fontSize = 24;
+    const int spacing = 2;
+
+
+
+
+    auto uiBg = scene.createEntity("battleDialog");
+    auto& uiTrans = uiBg.addComponent<Engine::Components::TransformComponent>();
+    uiTrans.Position = { 200.0, 100.0 };
+    Engine::Renderer::Material dialogFrame = { scene.m_TextureManager->getTexture(4), { 0.0, 0.0, 12.0, 12.0 } };
+    auto& bg = uiBg.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
+    bg.size = { 400, 200 };
+
+    auto uiText = scene.createEntity("battleDialog-text");
+    auto& uiTextTrans = uiText.addComponent<Engine::Components::TransformComponent>();
+    uiTextTrans.Position = { 10, 10 };
+    uiText.setParent(uiBg);
+
+    auto& textComp = uiText.addComponent<Engine::Components::TextComponent>("Player turn");
+    textComp.fontSize = fontSize;
+    textComp.spacing = spacing;
+    textComp.font = f;
+    textComp.color = BLACK;
 
    SetTargetFPS(60);
     while (!WindowShouldClose()) {

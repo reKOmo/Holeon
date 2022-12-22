@@ -6,8 +6,15 @@
 #define RESOURCE_PATH(path) "resources/" path
 #endif // HOLO_DEV
 
+#include <random>
+
 
 namespace Engine {
+
+    inline void initHelpers() {
+        std::srand(std::time(nullptr));
+    }
+
 	template <typename T>
     /*
         Returns index of elemetn in vector if found, -1 otherwise
@@ -21,4 +28,8 @@ namespace Engine {
             return -1;
         }
 	}
+
+    inline float rand() {
+        return (float)std::rand() / (float)(RAND_MAX);
+    }
 }

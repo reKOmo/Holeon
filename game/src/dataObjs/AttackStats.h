@@ -14,15 +14,13 @@ namespace Attack {
 }
 
 struct AttackStats {
-	float damage = 10.0;
 	float baseDamage = 10.0;
 	Attack::AttackTypes type = Attack::NULL_ATK;
-	int element = 0;
 	std::string name = "Attack";
 
 	AttackStats() = default;
 	AttackStats(const AttackStats&) = default;
-	AttackStats(std::string name, float damage = 10.0, Attack::AttackTypes type = Attack::DAMAGE, int elem = 0) : name(name), damage(damage), type(type), element(elem) {}
+	AttackStats(std::string name, float damage = 10.0, Attack::AttackTypes type = Attack::DAMAGE, int elem = 0) : name(name), baseDamage(damage), type(type) {}
 
 	operator bool() const {
 		return type != Attack::NULL_ATK;

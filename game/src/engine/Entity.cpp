@@ -29,10 +29,16 @@ namespace Engine {
 
 	void Entity::disable() {
 		getComponent<Engine::Components::InfoComponent>().disabled = true;
+		for (auto& ent : getChildren()) {
+			ent.disable();
+		}
 	}
 
 	void Entity::enable() {
 		getComponent<Engine::Components::InfoComponent>().disabled = false;
+		for (auto& ent : getChildren()) {
+			ent.enable();
+		}
 	}
 
 	std::vector<Engine::Entity> Entity::getChildren() {
