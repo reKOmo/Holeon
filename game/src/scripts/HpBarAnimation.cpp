@@ -1,20 +1,21 @@
 #include "HpBarAnimation.h"
 #include "Engine.h"
 
+constexpr float SCALE = 100.0;
+
 void HpBarAnimation::onCreate() {
-	duration = 1.0;
+	duration = 0.6;
 }
 
 void HpBarAnimation::onInit() {
-	tween = tweeny::from(currentBase).to(target);//.via(tweeny::easing::quinticOut);
+	tween = tweeny::from(currentBase * SCALE).to(target * SCALE).during(duration * SCALE).via(tweeny::easing::circularOut);
 }
 
 
 
 void HpBarAnimation::onUpdate(float delta) {
-	float progress = delta / duration;
-	printf("%f\n", progress);
-	float p = tween.step(progress);
+	float progress = (currentPlaytime + delta) / duration;
+	float p = tween.step(progress) / SCALE;
 	auto& bg = m_Owner.getComponent<Engine::Components::BackgroundComponent>();
 	bg.size.x = baseWidth * p;
 }

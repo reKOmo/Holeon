@@ -21,14 +21,15 @@ namespace Engine {
                 for (int i = mgr.currentlyPlaying.size() - 1; i >= 0; i--) {
                     const auto& clipPtr = mgr.currentlyPlaying[i];
                     if (clipPtr->currentPlaytime >= clipPtr->duration && clipPtr->duration != -1) {
+                        // reset control varibles
+                        clipPtr->currentPlaytime = 0;
+                        clipPtr->initialized = false;
                         if (clipPtr->loop) {
                             clipPtr->onInit();
-                            clipPtr->currentPlaytime = 0;
                         }
                         else {
                             clipPtr->onDestroy();
                             clipPtr->onEnd();
-                            clipPtr->initialized = false;
                             mgr.currentlyPlaying.erase(mgr.currentlyPlaying.begin() + i);
                         }
                     }

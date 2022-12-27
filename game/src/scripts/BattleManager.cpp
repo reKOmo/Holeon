@@ -46,10 +46,10 @@ void BattleManager::onCreate() {
 	statDisplayOpponent = getEntityByName("statsDisplayTop");
 
 	auto dis1 = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
-	dis1->setTargetEntity(player);
+	dis1->setTargetEntity(opponent);
 
 	auto dis2 = dynamic_cast<StatsDisplay*>(statDisplayPlayer.getComponent<Engine::Components::ScriptComponent>().instance);
-	dis2->setTargetEntity(opponent);
+	dis2->setTargetEntity(player);
 }
 
 void BattleManager::onUpdate(float delta) {
@@ -91,81 +91,34 @@ void BattleManager::damageTurn() {
 		justSwitched = false;
 	}
 
-	auto& children = battleProgressDialog.getChildren();
-	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
-
-	EntityStats& atk = player.getComponent<EntityStats>();
-	EntityStats& def = opponent.getComponent<EntityStats>();
-
 	if (waitingForAccept && IsKeyPressed(KEY_ENTER)) {
 		waitingForAccept = false;
 	}
-	
-	if (!waitingForAccept) {
-		int result;
-		switch (currentDamageStage) {
-		case DAMAGE_PHASE_ONE:
-			if (atk.currentWeapon.stats.speedMod >= def.currentWeapon.stats.speedMod) {
-				text.text = atk.name + " used " + atk.currentWeapon.attacks[playerPickedAtk].name;
-				result = dealDamage(atk, playerPickedAtk, def);
-			}
-			else {
-				text.text = def.name + " used " + def.currentWeapon.attacks[playerPickedAtk].name;
-				result = dealDamage(def, opponentPickedAtk, atk);
-			}
 
-			if (result >= 1 && result <= CRIT_HIT) {
-				auto mgr = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
-				mgr->updateHp([&]() {
-					waitingForAccept = true;
-					// need to check if result is a vaild battle stage before assiging
-					if (result != INVALID && result > DAMAGE_PHASE_TWO) {
-						currentDamageStage = (DAMAGE_TURN_STAGES) result;
-						nextDamageStage = DAMAGE_PHASE_TWO;
-					}
-					else {
-						currentDamageStage = DAMAGE_PHASE_TWO;
-					}
-				});
-				currentDamageStage = INVALID;
-			}
+	if (!waitingForAccept) {
+		switch (currentDamageStage) {
+		case SETUP:
+			setupPhase();
+			break;
+		case DAMAGE_PHASE_ONE:
+			damagePhaseOne();
 			break;
 		case DAMAGE_PHASE_TWO:
-			if (atk.currentWeapon.stats.speedMod < def.currentWeapon.stats.speedMod) {
-				text.text = atk.name + " used " + atk.currentWeapon.attacks[playerPickedAtk].name;
-				result = dealDamage(atk, playerPickedAtk, def);
-			}
-			else {
-				text.text = def.name + " used " + def.currentWeapon.attacks[playerPickedAtk].name;
-				result = dealDamage(def, opponentPickedAtk, atk);
-			}
-
-			if (result >= 1 && result <= CRIT_HIT) {
-				auto mgr = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
-				mgr->updateHp([&]() {
-					waitingForAccept = true;
-				// need to check if result is a vaild battle stage before assiging
-				if (result != INVALID && result > DAMAGE_PHASE_TWO) {
-					currentDamageStage = (DAMAGE_TURN_STAGES)result;
-					nextDamageStage = DAMAGE_PHASE_TWO;
-				}
-				else {
-					currentDamageStage = DAMAGE_PHASE_TWO;
-				}
-					});
-				currentDamageStage = INVALID;
-			}
+			damagePhaseTwo();
 			break;
 		case CRIT_HIT:
-			text.text = "Critical hit!";
-			waitingForAccept = true;
-			currentDamageStage = nextDamageStage;
-			nextDamageStage = INVALID;
+			critHitPhase();
 			break;
 		case END_ROUND:
-			currentDamageStage = DAMAGE_PHASE_ONE;
+			currentDamageStage = SETUP;
 			state = PLAYER_TURN;
 			waitingForAccept = false;
+			break;
+		case PLAYER_LOST:
+			playerLostPhase();
+			break;
+		case OPPONENT_LOST:
+			opponentLostPhase();
 			break;
 		default:
 			break;
@@ -173,16 +126,88 @@ void BattleManager::damageTurn() {
 	}
 }
 
+void BattleManager::setupPhase() {
+	EntityStats& pl = player.getComponent<EntityStats>();
+	EntityStats& op = opponent.getComponent<EntityStats>();
+	if (pl.currentWeapon.stats.speedMod >= op.currentWeapon.stats.speedMod) {
+		firstAttacker = player;
+		secondAttacker = opponent;
+	}
+	else {
+		firstAttacker = opponent;
+		secondAttacker = player;
+	}
+	currentDamageStage = DAMAGE_PHASE_ONE;
+}
+
+void BattleManager::damagePhaseOne() {
+	EntityStats& atk = firstAttacker.getComponent<EntityStats>();
+	EntityStats& def = secondAttacker.getComponent<EntityStats>();
+	if (firstAttacker == player) {
+		damagePhase(atk, def, playerPickedAtk, statDisplayOpponent, DAMAGE_PHASE_TWO);
+	}
+	else {
+		damagePhase(atk, def, opponentPickedAtk, statDisplayPlayer, DAMAGE_PHASE_TWO);
+	}
+}
+
+void BattleManager::damagePhaseTwo() {
+	EntityStats& atk2 = secondAttacker.getComponent<EntityStats>();
+	EntityStats& def2 = firstAttacker.getComponent<EntityStats>();
+	if (secondAttacker == player) {
+		damagePhase(atk2, def2, playerPickedAtk, statDisplayOpponent, END_ROUND);
+	}
+	else {
+		damagePhase(atk2, def2, opponentPickedAtk, statDisplayPlayer, END_ROUND);
+	}
+}
+
+void BattleManager::critHitPhase() {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	text.text = "Critical hit!";
+	waitingForAccept = true;
+	currentDamageStage = nextDamageStage;
+	nextDamageStage = INVALID;
+	checkHealth();
+}
+
+void BattleManager::playerLostPhase() {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	text.text = player.getComponent<EntityStats>().name + "'s contition fatal...\nFleeing";
+	waitingForAccept = true;
+}
+
+void BattleManager::opponentLostPhase() {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	text.text = opponent.getComponent<EntityStats>().name + " has been defeated!";
+	waitingForAccept = true;
+}
+
+void BattleManager::checkHealth() {
+	EntityStats& pl = player.getComponent<EntityStats>();
+	EntityStats& op = opponent.getComponent<EntityStats>();
+
+	if (pl.health <= 0) {
+		// player lost
+		currentDamageStage = PLAYER_LOST;
+	}
+	else if (op.health <= 0) {
+		//opponent lost
+		currentDamageStage = OPPONENT_LOST;
+	}
+}
+
 /*
 	returs
-	0 - nothing
-	// damageing ones
-	1 - did damage
-	3 - crit
-	// stat boost
+	0 - attack missed / to be added
+	1 - dealt damage
+	2 - crit
 */
 int BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStats& defender) {
-	int ret = INVALID;
+	int ret = 1;
 	//calc damage
 	float totalDamage = (attacker.currentWeapon.attacks[attackIndex].baseDamage * (attacker.level / 20.0)) * attacker.currentWeapon.stats.damageMod * (0.9 + Engine::rand() * 0.3);
 	float rand = Engine::rand();
@@ -190,7 +215,7 @@ int BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStat
 
 	if (isCrit) {
 		totalDamage *= 1.5 + Engine::rand() * 0.5;
-		ret = CRIT_HIT;
+		ret = 2;
 	}
 	//reduce damage
 	totalDamage /= defender.baseDefence / 0.8;
@@ -199,4 +224,36 @@ int BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStat
 	defender.health -= totalDamage;
 	printf("Health: %f\n", defender.health);
 	return ret;
+}
+
+void BattleManager::damagePhase(EntityStats& atk, EntityStats& def, int pickedAttack, Engine::Entity& affectedStaDisplay, DAMAGE_TURN_STAGES nextTurn) {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	int result;
+
+	text.text = atk.name + " used " + atk.currentWeapon.attacks[pickedAttack].name;
+	result = dealDamage(atk, playerPickedAtk, def);
+
+	if (result >= 1 && result <= 10) {
+		// attack some kid of damage
+		auto mgr = dynamic_cast<StatsDisplay*>(affectedStaDisplay.getComponent<Engine::Components::ScriptComponent>().instance);
+		mgr->updateHp([&, nextTurn, result]() {
+			waitingForAccept = true;
+			switch (result) {
+			case 2:
+				currentDamageStage = CRIT_HIT;
+				nextDamageStage = nextTurn;
+				break;
+			default:
+				currentDamageStage = nextTurn;
+				checkHealth();
+				break;
+			}
+		});
+		currentDamageStage = INVALID;
+	}
+	else {
+		waitingForAccept = true;
+		currentDamageStage = nextTurn;
+	}
 }

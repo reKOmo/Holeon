@@ -8,10 +8,10 @@ public:
 	void onInit();
 	void onUpdate(float delta);
 	void onDestroy();
-	float target = 136.0;
+	float target = 1.0;
 private:
 	const float baseWidth = 136.0;
-	float currentBase = baseWidth;
+	float currentBase = 1.0;
 	tweeny::tween<float> tween;
 
 };

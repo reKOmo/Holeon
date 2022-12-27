@@ -32,6 +32,7 @@ void StatsDisplay::setTargetEntity(Engine::Entity t) {
 void StatsDisplay::updateHp(std::function<void()> call) {
 	auto& stats = target.getComponent<EntityStats>();
 	float p = stats.health / stats.maxHelath;
+	printf("Stats in dispaly: %f", stats.health);
 
 	auto& animMgr = fillBar.getComponent<Engine::Components::AnimationManager>();
 	HpBarAnimation* a = dynamic_cast<HpBarAnimation*>(animMgr.animations[0].get());

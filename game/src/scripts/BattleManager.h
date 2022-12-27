@@ -9,11 +9,11 @@ enum BATTLE_STATE {
 
 enum DAMAGE_TURN_STAGES {
 	INVALID = 0,
+	SETUP,
 	DAMAGE_PHASE_ONE,
 	DAMAGE_PHASE_TWO,
-	// damage was dealt
-	CRIT_HIT, // keep as last!
-	//other
+	CRIT_HIT,
+	CHAECK_HEALTH,
 	PLAYER_LOST,
 	OPPONENT_LOST,
 	END_ROUND
@@ -31,8 +31,10 @@ private:
 	Engine::Entity battleProgressDialog;
 	Engine::Entity statDisplayPlayer;
 	Engine::Entity statDisplayOpponent;
+	Engine::Entity firstAttacker;
+	Engine::Entity secondAttacker;
 	bool justSwitched = false;
-	DAMAGE_TURN_STAGES currentDamageStage = DAMAGE_PHASE_ONE;
+	DAMAGE_TURN_STAGES currentDamageStage = SETUP;
 	DAMAGE_TURN_STAGES nextDamageStage = INVALID;
 	int playerPickedAtk = 0;
 	int opponentPickedAtk = 0;
@@ -40,4 +42,12 @@ private:
 	void playerTurn();
 	void damageTurn();
 	int dealDamage(EntityStats& a, int atk, EntityStats& b);
+	void damagePhase(EntityStats& atk, EntityStats& def, int pickedAttack, Engine::Entity& affectedStaDisplay, DAMAGE_TURN_STAGES nextTurn);
+	void setupPhase();
+	void damagePhaseOne();
+	void damagePhaseTwo();
+	void critHitPhase();
+	void playerLostPhase();
+	void opponentLostPhase();
+	void checkHealth();
 };
