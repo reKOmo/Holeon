@@ -7,13 +7,16 @@ namespace Engine {
             void updateAnimations(entt::registry& scene, float delta) {
                 scene.view<Engine::Components::AnimationManager>().each([&](entt::entity ent, Engine::Components::AnimationManager& mgr) {
                     for (auto& clip : mgr.currentlyPlaying) {
-                        if (!clip->initialized) {
+                        if (!clip->m_Owner) {
                             clip->m_Owner = { ent, &scene };
                             clip->onCreate();
+                        }
+                        if (!clip->initialized) {
                             clip->onInit();
                             clip->initialized = true;
                         }
                         clip->onUpdate(delta);
+                        clip->currentPlaytime += delta;
                     }
                 for (int i = mgr.currentlyPlaying.size() - 1; i >= 0; i--) {
                     const auto& clipPtr = mgr.currentlyPlaying[i];
@@ -25,6 +28,7 @@ namespace Engine {
                         else {
                             clipPtr->onDestroy();
                             clipPtr->onEnd();
+                            clipPtr->initialized = false;
                             mgr.currentlyPlaying.erase(mgr.currentlyPlaying.begin() + i);
                         }
                     }

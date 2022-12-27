@@ -36,7 +36,8 @@ project (workspaceName)
 		"src/**",
 		"include",
 		"../vendor/entt/include",
-		"../vendor/raylib-cpp/include"
+		"../vendor/raylib-cpp/include",
+		"../vendor/tweeny/include",
 	}
 	link_raylib();
 	

@@ -3,6 +3,7 @@
 #include "GameUtils.h"
 #include "EntityStats.h"
 #include "Helpers.h"
+#include "StatsDisplay.h"
 
 void BattleManager::onCreate() {
 	player = getEntityByName("player");
@@ -40,6 +41,15 @@ void BattleManager::onCreate() {
 		return battleUI;
 	});
 	attackUI.disable();
+
+	statDisplayPlayer = getEntityByName("statsDisplayBottom");
+	statDisplayOpponent = getEntityByName("statsDisplayTop");
+
+	auto dis1 = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
+	dis1->setTargetEntity(player);
+
+	auto dis2 = dynamic_cast<StatsDisplay*>(statDisplayPlayer.getComponent<Engine::Components::ScriptComponent>().instance);
+	dis2->setTargetEntity(opponent);
 }
 
 void BattleManager::onUpdate(float delta) {
@@ -84,69 +94,109 @@ void BattleManager::damageTurn() {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
 
-
 	EntityStats& atk = player.getComponent<EntityStats>();
 	EntityStats& def = opponent.getComponent<EntityStats>();
 
 	if (waitingForAccept && IsKeyPressed(KEY_ENTER)) {
 		waitingForAccept = false;
 	}
-
+	
 	if (!waitingForAccept) {
-		switch (damageTurnStage) {
-		case 0:
-			//deal fisrt damage
+		int result;
+		switch (currentDamageStage) {
+		case DAMAGE_PHASE_ONE:
 			if (atk.currentWeapon.stats.speedMod >= def.currentWeapon.stats.speedMod) {
-				std::string base = "Player used ";
-				printf("pl");
-				text.text = base + atk.currentWeapon.attacks[playerPickedAtk].name;
-				dealDamage(atk, playerPickedAtk, def);
+				text.text = atk.name + " used " + atk.currentWeapon.attacks[playerPickedAtk].name;
+				result = dealDamage(atk, playerPickedAtk, def);
 			}
 			else {
-				std::string base = "Opponent used ";
-				printf("op");
-				text.text = base + def.currentWeapon.attacks[opponentPickedAtk].name;
-				dealDamage(def, opponentPickedAtk, atk);
+				text.text = def.name + " used " + def.currentWeapon.attacks[playerPickedAtk].name;
+				result = dealDamage(def, opponentPickedAtk, atk);
 			}
-			waitingForAccept = true;
+
+			if (result >= 1 && result <= CRIT_HIT) {
+				auto mgr = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
+				mgr->updateHp([&]() {
+					waitingForAccept = true;
+					// need to check if result is a vaild battle stage before assiging
+					if (result != INVALID && result > DAMAGE_PHASE_TWO) {
+						currentDamageStage = (DAMAGE_TURN_STAGES) result;
+						nextDamageStage = DAMAGE_PHASE_TWO;
+					}
+					else {
+						currentDamageStage = DAMAGE_PHASE_TWO;
+					}
+				});
+				currentDamageStage = INVALID;
+			}
 			break;
-		case 1:
-			//deal fisrt damage
+		case DAMAGE_PHASE_TWO:
 			if (atk.currentWeapon.stats.speedMod < def.currentWeapon.stats.speedMod) {
-				std::string base = "Player used ";
-				printf("pl");
-				text.text = base + atk.currentWeapon.attacks[playerPickedAtk].name;
-				dealDamage(atk, playerPickedAtk, def);
+				text.text = atk.name + " used " + atk.currentWeapon.attacks[playerPickedAtk].name;
+				result = dealDamage(atk, playerPickedAtk, def);
 			}
 			else {
-				std::string base = "Opponent used ";
-				printf("op");
-				text.text = base + def.currentWeapon.attacks[opponentPickedAtk].name;
-				dealDamage(def, opponentPickedAtk, atk);
+				text.text = def.name + " used " + def.currentWeapon.attacks[playerPickedAtk].name;
+				result = dealDamage(def, opponentPickedAtk, atk);
 			}
-			waitingForAccept = true;
+
+			if (result >= 1 && result <= CRIT_HIT) {
+				auto mgr = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
+				mgr->updateHp([&]() {
+					waitingForAccept = true;
+				// need to check if result is a vaild battle stage before assiging
+				if (result != INVALID && result > DAMAGE_PHASE_TWO) {
+					currentDamageStage = (DAMAGE_TURN_STAGES)result;
+					nextDamageStage = DAMAGE_PHASE_TWO;
+				}
+				else {
+					currentDamageStage = DAMAGE_PHASE_TWO;
+				}
+					});
+				currentDamageStage = INVALID;
+			}
 			break;
-		case 3:
-			damageTurnStage = -1;
+		case CRIT_HIT:
+			text.text = "Critical hit!";
+			waitingForAccept = true;
+			currentDamageStage = nextDamageStage;
+			nextDamageStage = INVALID;
+			break;
+		case END_ROUND:
+			currentDamageStage = DAMAGE_PHASE_ONE;
 			state = PLAYER_TURN;
 			waitingForAccept = false;
 			break;
 		default:
 			break;
 		}
-		damageTurnStage++;
 	}
 }
 
-void BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStats& defender) {
+/*
+	returs
+	0 - nothing
+	// damageing ones
+	1 - did damage
+	3 - crit
+	// stat boost
+*/
+int BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStats& defender) {
+	int ret = INVALID;
 	//calc damage
-	float totalDamage = (attacker.currentWeapon.attacks[attackIndex].baseDamage * (attacker.level / 20.0)) * attacker.currentWeapon.stats.damageMod;
-	bool isCrit = Engine::rand() > attacker.currentWeapon.stats.speedMod / 8;
-	if (isCrit)
-		totalDamage *= 1.0 + Engine::rand();
+	float totalDamage = (attacker.currentWeapon.attacks[attackIndex].baseDamage * (attacker.level / 20.0)) * attacker.currentWeapon.stats.damageMod * (0.9 + Engine::rand() * 0.3);
+	float rand = Engine::rand();
+	bool isCrit = rand < attacker.currentWeapon.stats.speedMod / 8;
+
+	if (isCrit) {
+		totalDamage *= 1.5 + Engine::rand() * 0.5;
+		ret = CRIT_HIT;
+	}
 	//reduce damage
 	totalDamage /= defender.baseDefence / 0.8;
 
 	//deal damage
 	defender.health -= totalDamage;
+	printf("Health: %f\n", defender.health);
+	return ret;
 }
