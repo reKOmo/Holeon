@@ -7,6 +7,7 @@
 #endif // HOLO_DEV
 
 #include <random>
+#include <set>
 
 
 namespace Engine {

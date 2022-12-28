@@ -5,7 +5,7 @@
 
 void Engine::Renderer::Renderer2D::render() {
 	if (m_Camera) {
-		auto& cam = m_Camera->getComponent<raylib::Camera2D>();
+		auto& cam = m_Camera.getComponent<raylib::Camera2D>();
 
 		BeginMode2D(cam);
 		//render terrain
@@ -48,20 +48,21 @@ void Engine::Renderer::Renderer2D::render() {
 
 			DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
 		}
+
+		//render coliders -- debug
+		m_Registry->view<Engine::Components::ColiderComponent>().each([&](auto ent, Engine::Components::ColiderComponent& colider) {
+			Engine::Entity e = { ent, m_Registry };
+			auto pos = getAbsoluteTransform(e);
+			DrawRectangle(pos.Position.x, pos.Position.y, colider.plot.width, colider.plot.height, { 0, 255, 0, 30 });
+		});
+
+
 		EndMode2D();
 	}
 }
 
-void Engine::Renderer::Renderer2D::setCamera(Entity& c) {
-	m_Camera = &c;
-}
-
-Engine::Renderer::Renderer2D::Renderer2D(const Renderer2D& r)
-{
-}
-
-Engine::Renderer::Renderer2D::~Renderer2D()
-{
+void Engine::Renderer::Renderer2D::setCamera(Entity c) {
+	m_Camera = c;
 }
 
 

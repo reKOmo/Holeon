@@ -100,6 +100,7 @@ namespace Engine {
 
 			void stopAnimation(int index) {
 				currentlyPlaying[index]->onDestroy();
+				currentlyPlaying[index]->initialized = false;
 				currentlyPlaying[index]->onEnd();
 
 				currentlyPlaying.erase(currentlyPlaying.begin() + index);
@@ -116,10 +117,16 @@ namespace Engine {
 		// Rigidbody, movement and stuff
 		struct ColiderComponent {
 			raylib::Rectangle plot;
+			bool inserted = false;
+			bool trigger = false;
 
 			ColiderComponent() {}
 			ColiderComponent(const ColiderComponent&) = default;
+			ColiderComponent(raylib::Rectangle r) : plot(r) {}
 			
+		private:
+			raylib::Vector2 prevPosition;
+			friend Engine::Systems::RigidbodyManager;
 		};
 
 		struct RigidbodyComponent {

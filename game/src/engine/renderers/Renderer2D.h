@@ -10,17 +10,13 @@ namespace Engine {
 		public:
 			Renderer2D() = default;
 			Renderer2D(entt::registry* r, TextureManager* t) : m_Registry(r), m_TextureMgr(t) {}
-
-			Renderer2D(const Renderer2D& r);
 			Renderer2D& operator=(const Renderer2D& r) = default;
-
-			~Renderer2D();
 			
 			
 			void render();
-			void setCamera(Engine::Entity& c);
+			void setCamera(Engine::Entity c);
 		private:
-			Engine::Entity* m_Camera = nullptr;
+			Engine::Entity m_Camera;
 			entt::registry* m_Registry;
 			TextureManager* m_TextureMgr;
 		};

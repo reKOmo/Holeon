@@ -1,30 +1,18 @@
 #pragma once
 #include "Engine.h"
+#include <stack>
 
 class PlayerController : public Engine::Script {
-    void onCreate() {
-        auto& anim = m_Owner.getComponent<Engine::Components::AnimationManager>();
-        currentAnimId = anim.playAnimation(0, []() {
-            printf("Stopped animation");
-            });
-    }
-    void onUpdate(float delta) {
-        auto& trans = m_Owner.getComponent<Engine::Components::TransformComponent>();
-        const float speed = 200.0 * delta;
-        if (IsKeyDown(KEY_A)) trans.Position.x -= speed;
-        if (IsKeyDown(KEY_D)) trans.Position.x += speed;
-        if (IsKeyDown(KEY_W)) trans.Position.y -= speed;
-        if (IsKeyDown(KEY_S)) trans.Position.y += speed;
-        if (IsKeyDown(KEY_SPACE) && currentAnimId != -1) {
-            printf("%d\n", currentAnimId);
-            auto& anim = m_Owner.getComponent<Engine::Components::AnimationManager>();
-            anim.stopAnimation(currentAnimId);
-            currentAnimId = -1;
-        }
-    }
-    void onDestroy() {
-
+    void onCreate();
+    void onUpdate(float delta);
+    void onTrigger(Engine::Entity e) {
+        auto& info = e.getComponent<Engine::Components::InfoComponent>();
+        printf("Collided with %s\n", info.name.c_str());
     }
 private:
     int currentAnimId = -1;
+    raylib::Vector2 direction;
+    std::stack<KeyboardKey> keystrokes;
+    KeyboardKey currentKey = KEY_NULL;
+    const float speed = 80.0;
 };

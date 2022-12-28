@@ -2,7 +2,6 @@
 
 #include "entt.hpp"
 
-
 namespace Engine {
 	class Entity {
 	public:
@@ -44,10 +43,13 @@ namespace Engine {
 		bool operator ==(const Entity& other) const {
 			return m_EnttID == other.m_EnttID;
 		}
-
+		bool operator <(const Entity& other) const {
+			return m_EnttID < other.m_EnttID;
+		}
 	private:
 		entt::entity m_EnttID = entt::null;
 		entt::registry* m_Scene = nullptr;
 		friend class Scene;
 	};
 }
+

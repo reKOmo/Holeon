@@ -50,6 +50,7 @@ namespace Engine{
 	void Scene::update() {
 		/*
 			1. Update scripts
+			3. Update rigidbodies
 			2. Update animations
 		*/
 		m_Registry.view<Components::ScriptComponent, Engine::Components::InfoComponent>().each([=](auto ent, auto &script, auto &info) {
@@ -63,13 +64,13 @@ namespace Engine{
 				script.instance->onUpdate(GetFrameTime());
 			}
 		});
-
+		rigidMgr.update(&m_Registry, GetFrameTime());
 		Engine::Systems::Animator::updateAnimations(m_Registry, GetFrameTime());
 	}
 
 	void Scene::render() {
 		BeginDrawing();
-		ClearBackground(WHITE);
+		ClearBackground(backgroundColor);
 		m_Renderer2D.render();
 		m_RendererUI.render(&m_Registry);
 		EndDrawing();

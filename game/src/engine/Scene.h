@@ -5,6 +5,7 @@
 #include "Renderer2D.h"
 #include "UIRenderer.h"
 #include "FontManager.h"
+#include "RigidManager.h"
 
 namespace Engine {
 	class Scene {
@@ -22,11 +23,17 @@ namespace Engine {
 		void Scene::setCamera(Entity& ent);
 		friend class Renderer2D;
 
+		void setBackgroundColor(raylib::Color c) {
+			backgroundColor = c;
+		}
+
 		Renderer::FontManager* const m_FontManager = nullptr;
 		Renderer::TextureManager* const m_TextureManager = nullptr;
 	private:
 		entt::registry m_Registry;
 		Renderer::Renderer2D m_Renderer2D;
 		Renderer::UIRenderer m_RendererUI;
+		Systems::RigidbodyManager rigidMgr;
+		raylib::Color backgroundColor = WHITE;
 	};
 }

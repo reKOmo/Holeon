@@ -12,6 +12,10 @@ namespace Engine {
 		virtual void onCreate() {}
 		virtual void onUpdate(float delta) {}
 		virtual void onDestroy() {}
+		/*
+			Called when colided with colider makred as trigger
+		*/
+		virtual void onTrigger(Engine::Entity other) {}
 		Engine::Entity getEntityByName(std::string name);
 		/*
 			Lambda passed to this function should return entity that is highest in hiearchy
@@ -20,5 +24,6 @@ namespace Engine {
 	private:
 		Engine::Scene* m_Scene = nullptr;
 		friend class Scene;
+		friend Engine::Systems::RigidbodyManager;
 	};
 }
