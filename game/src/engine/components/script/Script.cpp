@@ -10,3 +10,8 @@ Engine::Entity Engine::Script::Instattiate(std::function<Engine::Entity(Engine::
 {
     return func(m_Scene);
 }
+
+Engine::SceneManager& Engine::Script::getSceneManager()
+{
+    return *m_Scene->m_SceneManager;
+}

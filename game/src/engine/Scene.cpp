@@ -1,19 +1,11 @@
 #include "Scene.h"
 #include "Entity.h"
 #include "Components.h"
+#include "SceneManager.h"
 
 namespace Engine{
-	Scene::Scene(Renderer::TextureManager* mgr, Renderer::FontManager* fontmgr)
-		: m_FontManager(fontmgr), m_TextureManager(mgr)
-	{
-		m_Renderer2D = Renderer::Renderer2D(&m_Registry, mgr);
-	}
-
 	Scene::~Scene() {
-		m_Registry.view<Components::ScriptComponent>().each([=](auto ent, auto& script) {
-			script.instance->onDestroy();
-			script.destroyFunction(&script);
-		});
+		destroy();
 	}
 
 	Entity Scene::createEntity(std::string name) {
@@ -64,20 +56,31 @@ namespace Engine{
 				script.instance->onUpdate(GetFrameTime());
 			}
 		});
-		rigidMgr.update(&m_Registry, GetFrameTime());
+		m_RigidMganager.update(&m_Registry, GetFrameTime());
 		Engine::Systems::Animator::updateAnimations(m_Registry, GetFrameTime());
 	}
 
 	void Scene::render() {
 		BeginDrawing();
-		ClearBackground(backgroundColor);
-		m_Renderer2D.render();
-		m_RendererUI.render(&m_Registry);
+		ClearBackground(m_BackgroundColor);
+		m_Renderer2D->render(&m_Registry);
+		m_RendererUI->render(&m_Registry);
 		EndDrawing();
 	}
 
 	void Scene::setCamera(Entity& ent) {
-		m_Renderer2D.setCamera(ent);
+		m_Renderer2D->setCamera(ent);
+	}
+
+	void Scene::destroy() {
+		if (!m_Registry.empty()) {
+			m_Registry.view<Components::ScriptComponent>().each([=](auto ent, auto& script) {
+				if (script.instance != nullptr) {
+					script.instance->onDestroy();
+					script.destroyFunction(&script);
+				}
+			});
+		}
 	}
 
 }

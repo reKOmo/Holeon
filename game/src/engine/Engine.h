@@ -8,3 +8,4 @@
 #include "Scene.h"
 #include "Script.h"
 #include "FontManager.h"
+#include "SceneManager.h"

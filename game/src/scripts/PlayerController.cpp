@@ -66,6 +66,6 @@ void PlayerController::onUpdate(float delta) {
         currentKey = KEY_NULL;
     }
 
-    auto& trans = m_Owner.getComponent<Engine::Components::TransformComponent>();
-    trans.Position += direction * delta;
+    auto& rigid = m_Owner.getComponent<Engine::Components::RigidbodyComponent>();
+    rigid.velocity = direction;
 }

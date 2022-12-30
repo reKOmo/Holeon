@@ -20,6 +20,7 @@ namespace Engine {
 			return m_Size;
 		}
 		friend std::ostream& operator<<(std::ostream& os, const TerrainMap& map);
+		std::vector<int> walkableTiles;
 	private:
 		std::vector<int> m_Map;
 		int m_Width = 0;

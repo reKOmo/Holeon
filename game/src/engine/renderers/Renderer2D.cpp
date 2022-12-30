@@ -3,13 +3,13 @@
 #include "raylib.hpp"
 #include "Renderer.h"
 
-void Engine::Renderer::Renderer2D::render() {
+void Engine::Renderer::Renderer2D::render(entt::registry* registry) {
 	if (m_Camera) {
 		auto& cam = m_Camera.getComponent<raylib::Camera2D>();
 
 		BeginMode2D(cam);
 		//render terrain
-		auto terrainGruop = m_Registry->group<Engine::Components::TerrainComponent>(entt::get<Engine::Components::TransformComponent>);
+		auto terrainGruop = registry->group<Engine::Components::TerrainComponent>(entt::get<Engine::Components::TransformComponent>);
 
 		if (terrainGruop.size() > 0) {
 			for (auto ent : terrainGruop) {
@@ -31,14 +31,14 @@ void Engine::Renderer::Renderer2D::render() {
 
 
 		//render sprites
-		auto group = m_Registry->group<Engine::Components::SpriteComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
+		auto group = registry->group<Engine::Components::SpriteComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
 		group.sort<Engine::Components::SpriteComponent>([](const Engine::Components::SpriteComponent& a, const Engine::Components::SpriteComponent& b) {
 			return a.layer < b.layer || a.zIndex < b.zIndex;
 			});
 		for (auto ent : group) {
 			auto& [sprite, transform, info] = group.get<Engine::Components::SpriteComponent, Engine::Components::TransformComponent, Engine::Components::InfoComponent>(ent);
 
-			Entity e = { ent, m_Registry };
+			Entity e = { ent, registry };
 			auto absTransform = getAbsoluteTransform(e);
 
 			raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
@@ -50,12 +50,18 @@ void Engine::Renderer::Renderer2D::render() {
 		}
 
 		//render coliders -- debug
-		m_Registry->view<Engine::Components::ColiderComponent>().each([&](auto ent, Engine::Components::ColiderComponent& colider) {
-			Engine::Entity e = { ent, m_Registry };
+		
+		registry->view<Engine::Components::ColiderComponent>().each([&](auto ent, Engine::Components::ColiderComponent& colider) {
+			Engine::Entity e = { ent, registry };
 			auto pos = getAbsoluteTransform(e);
-			DrawRectangle(pos.Position.x, pos.Position.y, colider.plot.width, colider.plot.height, { 0, 255, 0, 30 });
+			raylib::Color c;
+			if (colider.trigger)
+				c = { 255, 0, 0, 30 };
+			else
+				c ={ 0, 255, 0, 30 };
+			DrawRectangle(pos.Position.x + colider.plot.x, pos.Position.y + colider.plot.y, colider.plot.width, colider.plot.height, c);
 		});
-
+		
 
 		EndMode2D();
 	}

@@ -131,7 +131,6 @@ namespace Engine {
 
 		struct RigidbodyComponent {
 			raylib::Vector2 velocity;
-			bool kinematic = false;
 
 			RigidbodyComponent() {}
 			RigidbodyComponent(const RigidbodyComponent&) = default;

@@ -20,6 +20,7 @@ int main(void) {
         RESOURCE_PATH("select-arrow.png"),
         RESOURCE_PATH("hp-fill.png"),
         RESOURCE_PATH("hp-frame.png"),
+        RESOURCE_PATH("shadow.png"),
     };
 
     char* fonts[] = {
@@ -27,20 +28,24 @@ int main(void) {
     };
 
     Engine::Renderer::TextureManager textureMgr;
-    textureMgr.loadFiles(files, 7);
+    textureMgr.loadFiles(files, 9);
 
     Engine::Renderer::FontManager fontMgr;
     fontMgr.loadFiles(fonts, 1);
 
-    Engine::Scene ballteScene(&textureMgr, &fontMgr);
-    Engine::Scene worldScene(&textureMgr, &fontMgr);
+    Engine::SceneManager sceneMgr(&textureMgr, &fontMgr);
 
-    createWorldScene(worldScene);
+    sceneMgr.addScene(createWorldScene);
+    sceneMgr.addScene(createBattleScene);
 
-   SetTargetFPS(60);
+    sceneMgr.loadScene(0);
+
+    const int targetFps = 120;
+
+    SetTargetFPS(targetFps);
     while (!WindowShouldClose()) {
-        worldScene.update();
-        worldScene.render();
+        sceneMgr.tick();
+        //printf("Frametime: %f, Target: %f\n", GetFrameTime(), 1.0 / (float)targetFps);
     }
 
     CloseWindow();

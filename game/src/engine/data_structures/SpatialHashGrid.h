@@ -6,12 +6,34 @@
 #include <set>
 
 namespace Engine {
-    template <class V>
+    template <typename V>
     class SpatialHashGrid {
     public:
-        SpatialHashGrid(raylib::Rectangle bounds) : bounds(bounds) {
+        SpatialHashGrid() {}
+
+        SpatialHashGrid(raylib::Rectangle bounds, int chunkSize = 32) 
+            : bounds(bounds), cellSize(chunkSize)
+        {
             chunkedSize.x = bounds.width / cellSize;
             chunkedSize.y = bounds.height / cellSize;
+        }
+
+        SpatialHashGrid(SpatialHashGrid&& other) noexcept
+            : bounds(other.bounds), cellSize(other.chunkSize)
+        {
+            chunkedSize = other.chunkedSize;
+            grid = std::move(other.grid);
+        }
+
+        SpatialHashGrid& operator=(SpatialHashGrid&& other) noexcept {
+            if (this != &other) {
+                bounds = other.bounds;
+                cellSize = other.cellSize;
+                chunkedSize = other.chunkedSize;
+                grid = std::move(other.grid);
+            }
+
+            return *this;
         }
 
         void addObject(raylib::Rectangle key, V val) {
@@ -59,9 +81,9 @@ namespace Engine {
         }
 
     private:
-        raylib::Rectangle bounds;
-        raylib::Vector2 chunkedSize;
-        const int cellSize = 32;
+        raylib::Rectangle bounds = {0.0, 0.0};
+        raylib::Vector2 chunkedSize = { 0.0, 0.0 };
+        int cellSize = 0;
         std::map<int, std::set<V>> grid;
 
         raylib::Vector2 getGridPosition(raylib::Vector2 pos) {

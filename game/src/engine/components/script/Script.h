@@ -21,6 +21,7 @@ namespace Engine {
 			Lambda passed to this function should return entity that is highest in hiearchy
 		*/
 		Engine::Entity Instattiate(std::function<Engine::Entity(Engine::Scene* scene)>);
+		Engine::SceneManager& getSceneManager();
 	private:
 		Engine::Scene* m_Scene = nullptr;
 		friend class Scene;

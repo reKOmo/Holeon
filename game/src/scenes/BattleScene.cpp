@@ -6,6 +6,7 @@
 #include "GameUtils.h"
 #include "HpBarAnimation.h"
 #include "StatsDisplay.h"
+#include "CameraController.h"
 
 Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
     //background
@@ -75,6 +76,11 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
 }
 
 void createBattleScene(Engine::Scene& scene) {
+    auto camera = scene.createEntity("camera");
+    auto& camComp = camera.addComponent<raylib::Camera2D>();
+    scene.setCamera(camera);
+
+
     auto battleMgr = scene.createEntity("battleManager");
     battleMgr.addComponent<Engine::Components::ScriptComponent>().bind<BattleManager>();
 

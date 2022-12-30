@@ -8,9 +8,45 @@
 #include "RigidManager.h"
 
 namespace Engine {
+	class SceneManager;
 	class Scene {
 	public:
-		Scene(Renderer::TextureManager* mgr, Renderer::FontManager* fontmgr);
+		Scene(Renderer::TextureManager* mgr, Renderer::FontManager* fontmgr, Engine::SceneManager* smgr)
+			: m_FontManager(fontmgr), m_TextureManager(mgr), m_SceneManager(smgr) {}
+
+		Scene(Scene&& other) noexcept
+			: m_FontManager(other.m_FontManager), m_TextureManager(other.m_TextureManager), m_SceneManager(other.m_SceneManager)
+		{
+			destroy();
+
+			m_Registry = std::move(other.m_Registry);
+			m_Renderer2D = other.m_Renderer2D;
+			m_RendererUI = other.m_RendererUI;
+			m_RigidMganager = std::move(other.m_RigidMganager);
+			m_BackgroundColor = other.m_BackgroundColor;
+
+			other.m_Renderer2D = nullptr;
+			other.m_RendererUI = nullptr;
+
+		}
+
+		Scene& operator=(Scene&& other) noexcept {
+			if (this != &other) {
+				destroy();
+
+				m_Registry = std::move(other.m_Registry);
+				m_Renderer2D = other.m_Renderer2D;
+				m_RendererUI = other.m_RendererUI;
+				m_RigidMganager = std::move(other.m_RigidMganager);
+				m_BackgroundColor = other.m_BackgroundColor;
+
+				other.m_Renderer2D = nullptr;
+				other.m_RendererUI = nullptr;
+			}
+
+			return *this;
+		}
+
 		~Scene();
 		
 		Entity createEntity(std::string name = std::string());
@@ -22,18 +58,21 @@ namespace Engine {
 
 		void Scene::setCamera(Entity& ent);
 		friend class Renderer2D;
+		friend Engine::SceneManager;
 
 		void setBackgroundColor(raylib::Color c) {
-			backgroundColor = c;
+			m_BackgroundColor = c;
 		}
 
 		Renderer::FontManager* const m_FontManager = nullptr;
 		Renderer::TextureManager* const m_TextureManager = nullptr;
+		Engine::SceneManager* const m_SceneManager = nullptr;
 	private:
 		entt::registry m_Registry;
-		Renderer::Renderer2D m_Renderer2D;
-		Renderer::UIRenderer m_RendererUI;
-		Systems::RigidbodyManager rigidMgr;
-		raylib::Color backgroundColor = WHITE;
+		Renderer::Renderer2D* m_Renderer2D = nullptr;
+		Renderer::UIRenderer* m_RendererUI = nullptr;
+		Systems::RigidbodyManager m_RigidMganager = { {0.0, 0.0, 10000.0, 10000.0}, 32 };
+		raylib::Color m_BackgroundColor = WHITE;
+		void destroy();
 	};
 }
