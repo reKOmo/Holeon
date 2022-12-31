@@ -68,4 +68,5 @@ void PlayerController::onUpdate(float delta) {
 
     auto& rigid = m_Owner.getComponent<Engine::Components::RigidbodyComponent>();
     rigid.velocity = direction;
+
 }

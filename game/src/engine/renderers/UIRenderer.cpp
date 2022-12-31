@@ -50,4 +50,24 @@ void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 			DrawTextPro((*textComp.font), textComp.text, absTransform.Position, textComp.origin, textComp.rotation, textComp.fontSize, textComp.spacing, textComp.color);
 		}
 	}
+
+	//render all images
+	//render sprites
+	auto images = registry->group<Engine::Components::ImageComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
+	backgrounds.sort<Engine::Components::BackgroundComponent>([](const Engine::Components::BackgroundComponent& a, const Engine::Components::BackgroundComponent& b) {
+		return a.zIndex < b.zIndex;
+	});
+	for (auto ent : images) {
+		auto& [sprite, transform, info] = images.get<Engine::Components::ImageComponent, Engine::Components::TransformComponent, Engine::Components::InfoComponent>(ent);
+
+		Entity e = { ent, registry };
+		auto absTransform = getAbsoluteTransform(e);
+
+		raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
+
+		raylib::Rectangle destination = { absTransform.Position.x - sprite.origin.x * sprite.scale.x, absTransform.Position.y - sprite.origin.y * sprite.scale.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
+
+
+		DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
+	}
 }

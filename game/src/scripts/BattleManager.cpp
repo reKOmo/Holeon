@@ -175,7 +175,7 @@ void BattleManager::critHitPhase() {
 void BattleManager::playerLostPhase() {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
-	text.text = player.getComponent<EntityStats>().name + "'s contition fatal...\nFleeing";
+	text.text = player.getComponent<EntityStats>().name + "'s condition fatal...\nFleeing";
 	waitingForAccept = true;
 }
 

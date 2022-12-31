@@ -34,27 +34,48 @@ void Engine::Systems::RigidbodyManager::update(entt::registry* scene, float delt
 			colider.prevPosition = absTrans.Position;
 		}
 		
-		raylib::Rectangle absPlot = { absTrans.Position.x, absTrans.Position.y, colider.plot.width, colider.plot.height };
+		raylib::Rectangle absPlot = { absTrans.Position.x + colider.plot.x, absTrans.Position.y + colider.plot.y, colider.plot.width, colider.plot.height };
 		if (!colider.inserted) {
 			coliderGrid.addObject(absPlot, ent);
 			colider.inserted = true;
 		}
+		// TODO resolve non existing entities !!!!!!!!!!!!!!!!!!!
 		
 		//check trigger collisions
 		if (colider.trigger && scene->all_of<Engine::Components::ScriptComponent>(ent)) {
 			auto found = coliderGrid.getObjectsInRange({ absTrans.Position.x, absTrans.Position.y }, std::max(colider.plot.width, colider.plot.height) + 64);
+			std::vector<entt::entity> colidesWith;
 			for (auto& susEnt : found) {
 				if (susEnt != ent) {
 					auto& susColider = scene->get<Engine::Components::ColiderComponent>(susEnt);
 					Engine::Entity se = { susEnt, scene };
 					auto aT = Renderer::getAbsoluteTransform(se);
-					raylib::Rectangle susAbsPlot = { aT.Position.x, aT.Position.y, susColider.plot.width, susColider.plot.height };
+					raylib::Rectangle susAbsPlot = { aT.Position.x + susColider.plot.x, aT.Position.y + susColider.plot.y, susColider.plot.width, susColider.plot.height };
 					if (absPlot.CheckCollision(susAbsPlot)) {
+						colidesWith.push_back(susEnt);
 						auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
 						script.instance->onTrigger({ susEnt, scene });
 					}
 				}
 			}
+			// new coliders
+			for (auto& col : colidesWith) {
+				int index = Engine::findIndex(colider.colidingWith, col);
+				if (index != -1) {
+					colider.colidingWith.erase(colider.colidingWith.begin() + index);
+				}
+				else {
+					auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
+					script.instance->onTriggerEnter({ col, scene });
+				}
+			}
+			// exited coliders
+			for (auto& col : colider.colidingWith) {
+				auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
+				script.instance->onTriggerExit({ col, scene });
+			}
+			// replace
+			colider.colidingWith = std::move(colidesWith);
 		}
 	});
 

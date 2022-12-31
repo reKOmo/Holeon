@@ -38,6 +38,7 @@ project (workspaceName)
 		"../vendor/entt/include",
 		"../vendor/raylib-cpp/include",
 		"../vendor/tweeny/include",
+		"../vendor/json/include",
 	}
 	link_raylib();
 	

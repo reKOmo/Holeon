@@ -21,6 +21,8 @@ int main(void) {
         RESOURCE_PATH("hp-fill.png"),
         RESOURCE_PATH("hp-frame.png"),
         RESOURCE_PATH("shadow.png"),
+        RESOURCE_PATH("rat-nest.png"),
+        RESOURCE_PATH("battle-transition.png"),
     };
 
     char* fonts[] = {
@@ -28,7 +30,7 @@ int main(void) {
     };
 
     Engine::Renderer::TextureManager textureMgr;
-    textureMgr.loadFiles(files, 9);
+    textureMgr.loadFiles(files, 11);
 
     Engine::Renderer::FontManager fontMgr;
     fontMgr.loadFiles(fonts, 1);

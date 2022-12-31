@@ -16,6 +16,8 @@ namespace Engine {
 			Called when colided with colider makred as trigger
 		*/
 		virtual void onTrigger(Engine::Entity other) {}
+		virtual void onTriggerEnter(Engine::Entity other) {}
+		virtual void onTriggerExit(Engine::Entity other) {}
 		Engine::Entity getEntityByName(std::string name);
 		/*
 			Lambda passed to this function should return entity that is highest in hiearchy

@@ -76,7 +76,7 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
 }
 
 void createBattleScene(Engine::Scene& scene) {
-    auto camera = scene.createEntity("camera");
+     auto camera = scene.createEntity("camera");
     auto& camComp = camera.addComponent<raylib::Camera2D>();
     scene.setCamera(camera);
 
@@ -89,7 +89,7 @@ void createBattleScene(Engine::Scene& scene) {
     playerStats.name = "Player";
     playerStats.currentWeapon.attacks[0] = {
         "Slash",
-        2.0,
+        5.0,
         Attack::DAMAGE
     };
     playerStats.currentWeapon.attacks[1] = {

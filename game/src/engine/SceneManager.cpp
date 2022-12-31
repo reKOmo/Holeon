@@ -1,4 +1,6 @@
 #include "SceneManager.h"
+#include "SceneManager.h"
+#include "SceneManager.h"
 
 void Engine::SceneManager::loadScene(int id) {
 	if (id < 0 || id >= m_Scenes.size()) return;

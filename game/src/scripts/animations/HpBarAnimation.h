@@ -12,6 +12,6 @@ public:
 private:
 	const float baseWidth = 136.0;
 	float currentBase = 1.0;
-	tweeny::tween<float> tween;
+	tweeny::tween<double> tween;
 
 };

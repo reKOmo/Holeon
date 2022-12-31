@@ -21,7 +21,7 @@ namespace Engine {
 
 		struct SpriteComponent {
 			Renderer::Material material;
-			raylib::Vector2 scale = { 0,0 };
+			raylib::Vector2 scale = { 1.0, 1.0 };
 			raylib::Color tint = WHITE;
 			raylib::Vector2 origin = { 0,0 };
 			int layer = 0;
@@ -92,8 +92,10 @@ namespace Engine {
 			}
 
 			template<typename T>
-			int playAnimation() {
-				currentlyPlaying.push_back(make_shared<T>());
+			int playAnimation(std::function<void()> onEnd = []() {}) {
+				std::shared_ptr<AnimationClip> anim = static_cast<std::shared_ptr<AnimationClip>>(std::make_shared<T>());
+				currentlyPlaying.push_back(anim);
+				anim->onEnd = onEnd;
 
 				return currentlyPlaying.size() - 1;
 			}
@@ -126,6 +128,7 @@ namespace Engine {
 			
 		private:
 			raylib::Vector2 prevPosition;
+			std::vector<entt::entity> colidingWith = {};
 			friend Engine::Systems::RigidbodyManager;
 		};
 
@@ -151,6 +154,25 @@ namespace Engine {
 			BackgroundComponent() = default;
 			BackgroundComponent(const BackgroundComponent&) = default;
 			BackgroundComponent(Renderer::Material m, raylib::Vector2 size = { 32.0, 16.0 }, raylib::Vector2 o = { 0.0, 0.0 }, raylib::Color t = WHITE) : material(m), size(size), origin(o), tint(t) {
+				totalFrames = (m.texture->height / (int)m.tilePlot.height) * (m.texture->width / (int)m.tilePlot.width);
+			}
+
+		};
+		
+		struct ImageComponent {
+			Renderer::Material material;
+			raylib::Vector2 scale = { 1.0, 1.0 };
+			raylib::Color tint = WHITE;
+			raylib::Vector2 origin = { 0,0 };
+			int layer = 0;
+			int zIndex = 0;
+
+			int imageIndex = 0;
+			int totalFrames = 1;
+
+			ImageComponent() = default;
+			ImageComponent(const ImageComponent&) = default;
+			ImageComponent(Renderer::Material m, raylib::Vector2 scale = { 1.0f }, raylib::Vector2 o = { 0.0, 0.0 }, raylib::Color t = WHITE) : material(m), scale(scale), origin(o), tint(t) {
 				totalFrames = (m.texture->height / (int)m.tilePlot.height) * (m.texture->width / (int)m.tilePlot.width);
 			}
 

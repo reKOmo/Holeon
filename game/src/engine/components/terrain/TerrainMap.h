@@ -9,6 +9,12 @@ namespace Engine {
 		TerrainMap() {}
 		TerrainMap(const TerrainMap&) = default;
 		void loadMap(std::string src);
+		void setMap(std::vector<int>& m, int width, int height) {
+			m_Map = std::move(m);
+			m_Height = height;
+			m_Width = width;
+			m_Size = width * height;
+		}
 		int operator () (int x, int y);
 		int width() const {
 			return m_Width;

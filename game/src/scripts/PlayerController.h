@@ -5,9 +5,14 @@
 class PlayerController : public Engine::Script {
     void onCreate();
     void onUpdate(float delta);
-    void onTrigger(Engine::Entity e) {
+    void onTriggerEnter(Engine::Entity e) {
         auto& info = e.getComponent<Engine::Components::InfoComponent>();
-        printf("Collided with %s\n", info.name.c_str());
+        printf("Entered collided with %s\n", info.name.c_str());
+    }
+    
+    void onTriggerExit(Engine::Entity e) {
+        auto& info = e.getComponent<Engine::Components::InfoComponent>();
+        printf("Exited collided with %s\n", info.name.c_str());
     }
 private:
     int currentAnimId = -1;

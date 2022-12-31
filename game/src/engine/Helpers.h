@@ -6,12 +6,13 @@
 #define RESOURCE_PATH(path) "resources/" path
 #endif // HOLO_DEV
 
+constexpr auto SecToMs = 1000.0;
+
 #include <random>
 #include <set>
 
 
 namespace Engine {
-
     inline void initHelpers() {
         std::srand(std::time(nullptr));
     }

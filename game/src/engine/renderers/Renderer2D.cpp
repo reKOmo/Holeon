@@ -32,9 +32,17 @@ void Engine::Renderer::Renderer2D::render(entt::registry* registry) {
 
 		//render sprites
 		auto group = registry->group<Engine::Components::SpriteComponent>(entt::get<Engine::Components::TransformComponent, Engine::Components::InfoComponent>);
-		group.sort<Engine::Components::SpriteComponent>([](const Engine::Components::SpriteComponent& a, const Engine::Components::SpriteComponent& b) {
-			return a.layer < b.layer || a.zIndex < b.zIndex;
-			});
+		group.sort<Engine::Components::SpriteComponent, Engine::Components::TransformComponent>([](const auto& lhs, const auto& rhs) {
+			auto& [lSprite, lTrans] = lhs;
+			auto& [rSprite, rTrans] = rhs;
+
+			bool res;
+			if (lSprite.layer == rSprite.layer && lSprite.zIndex == rSprite.zIndex)
+				res = lTrans.Position.y < rTrans.Position.y;
+			else
+				res = lSprite.layer < rSprite.layer || lSprite.zIndex < rSprite.zIndex;
+			return res;
+		});
 		for (auto ent : group) {
 			auto& [sprite, transform, info] = group.get<Engine::Components::SpriteComponent, Engine::Components::TransformComponent, Engine::Components::InfoComponent>(ent);
 
@@ -43,7 +51,7 @@ void Engine::Renderer::Renderer2D::render(entt::registry* registry) {
 
 			raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
 
-			raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
+			raylib::Rectangle destination = { absTransform.Position.x - sprite.origin.x * sprite.scale.x, absTransform.Position.y - sprite.origin.y * sprite.scale.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
 
 
 			DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
