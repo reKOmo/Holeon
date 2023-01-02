@@ -49,6 +49,7 @@ namespace Engine {
 
 		struct ScriptComponent {
 			Engine::Script* instance = nullptr;
+			bool paused = false;
 			
 			Engine::Script*(*createFunction)();
 			void(*destroyFunction)(ScriptComponent*);
@@ -68,18 +69,23 @@ namespace Engine {
 			std::string name = "";
 			std::vector<std::string> tags = {};
 			bool disabled = false;
+			inline uint32_t id() {
+				return m_Id;
+			}
 
-			InfoComponent() = default;
-			InfoComponent(const InfoComponent&) = default;
-			InfoComponent(std::string n) : name(n) {}
-
+			InfoComponent() {}
+			InfoComponent(uint32_t i) : m_Id(i) {}
+			//InfoComponent(const InfoComponent&) = default;
+			InfoComponent(std::string n, uint32_t i) : m_Id(i), name(n) {}
 		private:
 			Engine::Entity m_Parent = {};
 			std::vector<Engine::Entity> m_Children = {};
 			friend class Engine::Entity;
+			uint32_t m_Id = 0;
 		};
 
 		struct AnimationManager {
+			bool useUnscaledTime = false;
 			std::shared_ptr<Engine::AnimationClip>* animations;
 			int animationsSize = 0;
 			std::vector<std::shared_ptr<Engine::AnimationClip>> currentlyPlaying = {};

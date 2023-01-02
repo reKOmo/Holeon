@@ -5,30 +5,33 @@
 #include "Helpers.h"
 #include "StatsDisplay.h"
 
+#include <format>
+
 void BattleManager::onCreate() {
-	player = getEntityByName("player");
-	opponent = getEntityByName("opponent");
+	playerStats = getGlobalStorage().get<EntityStats>("playerStats");
+	opponentStats = getGlobalStorage().get<EntityStats>("opponentStats");
+
 	battleProgressDialog = getEntityByName("battleDialog");
-	attackUI = Instattiate([&](Engine::Scene* scene) {
+	attacksListUI = Instattiate([&](Engine::Scene* scene) {
 		Engine::Entity buttons[Attack::maxAttacks];
 
-		auto battleUI = scene->createEntity("battleUI");
-		auto& uiTrans = battleUI.addComponent<Engine::Components::TransformComponent>();
+		auto battleUI = scene->getEntityByName("attackList");
 		
 
 		battleUI.addComponent<Engine::Components::ScriptComponent>().bind<ButtonManager>();
 		auto& uiMgrData = battleUI.addComponent<Engine::Components::ButtonManagerData>();
 
-		auto& weapon = player.getComponent<EntityStats>().currentWeapon;
+		auto& weapon = playerStats->currentWeapon;
 		for (int i = 0; i < Attack::maxAttacks; i++) {
 			if (weapon.attacks[i]) {
 				auto button = createDialogButton(weapon.attacks[i].name, "button", i, scene);
+				button.getComponent<Engine::Components::BackgroundComponent>().scale = { 4.0, 4.0 };
 				if (i > 0) {
 					button.getComponent<Engine::Components::ButtonComponent>().top = buttons[i - 1];
 					buttons[i - 1].getComponent<Engine::Components::ButtonComponent>().bottom = button;
 
 					auto& buttonTrans = button.getComponent<Engine::Components::TransformComponent>();
-					buttonTrans.Position = { 0.0, (float)i * 60.0f };
+					buttonTrans.Position = { 0.0, (float)i * 70.0f };
 				}
 				button.setParent(battleUI);
 				if (i == 0) {
@@ -40,16 +43,18 @@ void BattleManager::onCreate() {
 
 		return battleUI;
 	});
+	attackUI = getEntityByName("attackMenu");
 	attackUI.disable();
 
 	statDisplayPlayer = getEntityByName("statsDisplayBottom");
 	statDisplayOpponent = getEntityByName("statsDisplayTop");
-
 	auto dis1 = dynamic_cast<StatsDisplay*>(statDisplayOpponent.getComponent<Engine::Components::ScriptComponent>().instance);
-	dis1->setTargetEntity(opponent);
-
+	dis1->setTarget(opponentStats);
 	auto dis2 = dynamic_cast<StatsDisplay*>(statDisplayPlayer.getComponent<Engine::Components::ScriptComponent>().instance);
-	dis2->setTargetEntity(player);
+	dis2->setTarget(playerStats);
+
+	auto weaponSprite = getEntityByName("weaponSprite");
+	weaponSprite.getComponent<Engine::Components::ImageComponent>().material = { getSceneManager().getActveScene().m_TextureManager->getTexture(0), {0.0, 0.0, 32.0, 32.0} };
 }
 
 void BattleManager::onUpdate(float delta) {
@@ -67,7 +72,7 @@ void BattleManager::onUpdate(float delta) {
 
 void BattleManager::playerTurn() {
 	if (attackUI.disabled()) {
-		auto& script = attackUI.getComponent<Engine::Components::ScriptComponent>();
+		auto& script = attacksListUI.getComponent<Engine::Components::ScriptComponent>();
 		if (script) {
 			auto buttonMgr = dynamic_cast<ButtonManager*>(script.instance);
 			buttonMgr->onSelect([&](int val) {
@@ -76,6 +81,7 @@ void BattleManager::playerTurn() {
 				playerPickedAtk = val;
 			});
 			attackUI.enable();
+			battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 440.0;
 			auto& children = battleProgressDialog.getChildren();
 			auto& text = children[0].getComponent<Engine::Components::TextComponent>();
 			text.text = "Pick next move";
@@ -86,6 +92,7 @@ void BattleManager::playerTurn() {
 void BattleManager::damageTurn() {
 	if (!attackUI.disabled()) {
 		attackUI.disable();
+		battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 300.0;
 	}
 	if (justSwitched) {
 		justSwitched = false;
@@ -120,6 +127,15 @@ void BattleManager::damageTurn() {
 		case OPPONENT_LOST:
 			opponentLostPhase();
 			break;
+		case GRANT_EXP:
+			grantExpPhase();
+			break;
+		case LEVEL_UP:
+			levelUpPhase();
+			break;
+		case END_BATTLE:
+			endBattlePhase();
+			break;
 		default:
 			break;
 		}
@@ -127,38 +143,32 @@ void BattleManager::damageTurn() {
 }
 
 void BattleManager::setupPhase() {
-	EntityStats& pl = player.getComponent<EntityStats>();
-	EntityStats& op = opponent.getComponent<EntityStats>();
-	if (pl.currentWeapon.stats.speedMod >= op.currentWeapon.stats.speedMod) {
-		firstAttacker = player;
-		secondAttacker = opponent;
+	if (playerStats->currentWeapon.stats.speedMod >= opponentStats->currentWeapon.stats.speedMod) {
+		firstAttacker = playerStats;
+		secondAttacker = opponentStats;
 	}
 	else {
-		firstAttacker = opponent;
-		secondAttacker = player;
+		firstAttacker = opponentStats;
+		secondAttacker = playerStats;
 	}
 	currentDamageStage = DAMAGE_PHASE_ONE;
 }
 
 void BattleManager::damagePhaseOne() {
-	EntityStats& atk = firstAttacker.getComponent<EntityStats>();
-	EntityStats& def = secondAttacker.getComponent<EntityStats>();
-	if (firstAttacker == player) {
-		damagePhase(atk, def, playerPickedAtk, statDisplayOpponent, DAMAGE_PHASE_TWO);
+	if (firstAttacker == playerStats) {
+		damagePhase(firstAttacker, secondAttacker, playerPickedAtk, statDisplayOpponent, DAMAGE_PHASE_TWO);
 	}
 	else {
-		damagePhase(atk, def, opponentPickedAtk, statDisplayPlayer, DAMAGE_PHASE_TWO);
+		damagePhase(firstAttacker, secondAttacker, opponentPickedAtk, statDisplayPlayer, DAMAGE_PHASE_TWO);
 	}
 }
 
 void BattleManager::damagePhaseTwo() {
-	EntityStats& atk2 = secondAttacker.getComponent<EntityStats>();
-	EntityStats& def2 = firstAttacker.getComponent<EntityStats>();
-	if (secondAttacker == player) {
-		damagePhase(atk2, def2, playerPickedAtk, statDisplayOpponent, END_ROUND);
+	if (secondAttacker == playerStats) {
+		damagePhase(secondAttacker, firstAttacker, playerPickedAtk, statDisplayOpponent, END_ROUND);
 	}
 	else {
-		damagePhase(atk2, def2, opponentPickedAtk, statDisplayPlayer, END_ROUND);
+		damagePhase(secondAttacker, firstAttacker, opponentPickedAtk, statDisplayPlayer, END_ROUND);
 	}
 }
 
@@ -175,26 +185,66 @@ void BattleManager::critHitPhase() {
 void BattleManager::playerLostPhase() {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
-	text.text = player.getComponent<EntityStats>().name + "'s condition fatal...\nFleeing";
+	text.text = playerStats->name + "'s condition fatal...\nFleeing";
 	waitingForAccept = true;
 }
 
 void BattleManager::opponentLostPhase() {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
-	text.text = opponent.getComponent<EntityStats>().name + " has been defeated!";
+	text.text = opponentStats->name + " has been defeated!";
+	currentDamageStage = GRANT_EXP;
 	waitingForAccept = true;
 }
 
-void BattleManager::checkHealth() {
-	EntityStats& pl = player.getComponent<EntityStats>();
-	EntityStats& op = opponent.getComponent<EntityStats>();
+void BattleManager::grantExpPhase() {
+	const int baseXP = 64;
+	int gainedXp = (opponentStats->level * baseXP) / 7;
+	playerStats->xp += gainedXp;
 
-	if (pl.health <= 0) {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	std::string t = "Gained ";
+	text.text = t + std::to_string(gainedXp) + "XP!";
+	currentDamageStage = LEVEL_UP;
+	waitingForAccept = true;
+}
+
+void BattleManager::levelUpPhase() {
+	int requiredXp = std::pow(playerStats->level, 3) - std::pow(playerStats->level - 1, 3);
+
+	bool grew = false;
+
+	do {
+		if (playerStats->xp >= requiredXp) {
+			playerStats->level++;
+			playerStats->xp -= requiredXp;
+			grew = true;
+			requiredXp = std::pow(playerStats->level, 3) - std::pow(playerStats->level - 1, 3);
+		}
+	} while (playerStats->xp >= requiredXp);
+
+	if (grew) {
+		auto& children = battleProgressDialog.getChildren();
+		auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+		std::string t = "Grew to level ";
+		text.text = t + std::to_string(playerStats->level) + "!";
+		waitingForAccept = true;
+	}
+	currentDamageStage = END_BATTLE;
+}
+
+void BattleManager::endBattlePhase() {
+
+	getSceneManager().loadScene(0);
+}
+
+void BattleManager::checkHealth() {
+	if (playerStats->health <= 0) {
 		// player lost
 		currentDamageStage = PLAYER_LOST;
 	}
-	else if (op.health <= 0) {
+	else if (opponentStats->health <= 0) {
 		//opponent lost
 		currentDamageStage = OPPONENT_LOST;
 	}
@@ -206,32 +256,32 @@ void BattleManager::checkHealth() {
 	1 - dealt damage
 	2 - crit
 */
-int BattleManager::dealDamage(EntityStats& attacker, int attackIndex, EntityStats& defender) {
+int BattleManager::dealDamage(EntityStats* attacker, int attackIndex, EntityStats* defender) {
 	int ret = 1;
 	//calc damage
-	float totalDamage = (attacker.currentWeapon.attacks[attackIndex].baseDamage * (attacker.level / 20.0)) * attacker.currentWeapon.stats.damageMod * (0.9 + Engine::rand() * 0.3);
+	float totalDamage = (attacker->currentWeapon.attacks[attackIndex].baseDamage * (attacker->level / 20.0)) * attacker->currentWeapon.stats.damageMod * (0.9 + Engine::rand() * 0.3);
 	float rand = Engine::rand();
-	bool isCrit = rand < attacker.currentWeapon.stats.speedMod / 8;
+	bool isCrit = rand < attacker->currentWeapon.stats.speedMod / 8;
 
 	if (isCrit) {
 		totalDamage *= 1.5 + Engine::rand() * 0.5;
 		ret = 2;
 	}
 	//reduce damage
-	totalDamage /= defender.baseDefence / 0.8;
+	totalDamage /= defender->baseDefence / 0.8;
 
 	//deal damage
-	defender.health -= totalDamage;
-	printf("Health: %f\n", defender.health);
+	defender->health -= totalDamage;
+	printf("Health: %f\n", defender->health);
 	return ret;
 }
 
-void BattleManager::damagePhase(EntityStats& atk, EntityStats& def, int pickedAttack, Engine::Entity& affectedStaDisplay, DAMAGE_TURN_STAGES nextTurn) {
+void BattleManager::damagePhase(EntityStats* atk, EntityStats* def, int pickedAttack, Engine::Entity& affectedStaDisplay, DAMAGE_TURN_STAGES nextTurn) {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
 	int result;
 
-	text.text = atk.name + " used " + atk.currentWeapon.attacks[pickedAttack].name;
+	text.text = atk->name + " used " + atk->currentWeapon.attacks[pickedAttack].name;
 	result = dealDamage(atk, playerPickedAtk, def);
 
 	if (result >= 1 && result <= 10) {

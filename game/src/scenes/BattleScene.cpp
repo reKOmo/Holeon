@@ -12,15 +12,15 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
     //background
     auto uiBg = scene.createEntity(name);
     auto& uiTrans = uiBg.addComponent<Engine::Components::TransformComponent>();
-    uiTrans.Position = { 600.0, 300.0 };
     Engine::Renderer::Material dialogFrame = { scene.m_TextureManager->getTexture(4), { 0.0, 0.0, 12.0, 12.0 } };
     auto& bg = uiBg.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
     bg.size = { 230, 65 };
+    bg.scale = { 4.0, 4.0 };
 
     // Name display
     auto uiText = scene.createEntity("name");
     auto& uiTextTrans = uiText.addComponent<Engine::Components::TransformComponent>();
-    uiTextTrans.Position = { 10, 10 };
+    uiTextTrans.Position = { 15, 10 };
     uiText.setParent(uiBg);
 
     auto& textComp = uiText.addComponent<Engine::Components::TextComponent>("Placeholder");
@@ -34,9 +34,8 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
     // Level display
     auto lvText = scene.createEntity("level");
     auto& uiTextTransv = lvText.addComponent<Engine::Components::TransformComponent>();
-    uiTextTransv.Position = { 10.0, levelY };
+    uiTextTransv.Position = { 15.0, levelY };
     lvText.setParent(uiBg);
-
     auto& lvTextComp = lvText.addComponent<Engine::Components::TextComponent>("Lv.  2");
     lvTextComp.fontSize = 20;
     lvTextComp.spacing = 2;
@@ -47,7 +46,7 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
     raylib::Vector2 hpBarLengthSize = { 140.0, 15.0 };
     auto uiHPFrame = scene.createEntity("hp-frame");
     auto& uiHPTrans = uiHPFrame.addComponent<Engine::Components::TransformComponent>();
-    uiHPTrans.Position = { 75.0, levelY + 2 };
+    uiHPTrans.Position = { 80.0, levelY + 2 };
     Engine::Renderer::Material hpFrame = { scene.m_TextureManager->getTexture(7), { 0.0, 0.0, 12.0, 12.0 } };
     auto& hpBg = uiHPFrame.addComponent<Engine::Components::BackgroundComponent>(hpFrame);
     hpBg.zIndex = 1;
@@ -76,37 +75,33 @@ Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
 }
 
 void createBattleScene(Engine::Scene& scene) {
-     auto camera = scene.createEntity("camera");
+    auto camera = scene.createEntity("camera");
     auto& camComp = camera.addComponent<raylib::Camera2D>();
     scene.setCamera(camera);
+    camComp.target = { 590.0, 340.0 };
+    camComp.offset = { 640, 360 };
+    camComp.zoom = 0.9;
+    camComp.rotation = 0.0;
+
+    scene.setBackgroundColor({18, 25, 37, 255});
 
 
     auto battleMgr = scene.createEntity("battleManager");
     battleMgr.addComponent<Engine::Components::ScriptComponent>().bind<BattleManager>();
 
     auto player = scene.createEntity("player");
-    auto& playerStats = player.addComponent<EntityStats>();
-    playerStats.name = "Player";
-    playerStats.currentWeapon.attacks[0] = {
-        "Slash",
-        5.0,
-        Attack::DAMAGE
-    };
-    playerStats.currentWeapon.attacks[1] = {
-        "Boost",
-        0.2,
-        Attack::ATK_BOOST
-    };
+    // remove stats
 
     auto opponent = scene.createEntity("opponent");
-    auto& opponentStats = opponent.addComponent<EntityStats>();
-    opponentStats.name = "Rat";
-    opponentStats.currentWeapon.attacks[0] = {
+
+    EntityStats* opponentStats = scene.m_GlobalStorage->emplace<EntityStats>("opponentStats");
+    opponentStats->name = "Rat";
+    opponentStats->currentWeapon.attacks[0] = {
         "Slash",
         2.0,
         Attack::DAMAGE
     };
-    opponentStats.currentWeapon.attacks[1] = {
+    opponentStats->currentWeapon.attacks[1] = {
         "Boost",
         0.2,
         Attack::ATK_BOOST
@@ -119,14 +114,15 @@ void createBattleScene(Engine::Scene& scene) {
 
     auto uiBg = scene.createEntity("battleDialog");
     auto& uiTrans = uiBg.addComponent<Engine::Components::TransformComponent>();
-    uiTrans.Position = { 200.0, 100.0 };
+    uiTrans.Position = { 850.0, 460.0 };
     Engine::Renderer::Material dialogFrame = { scene.m_TextureManager->getTexture(4), { 0.0, 0.0, 12.0, 12.0 } };
     auto& bg = uiBg.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
-    bg.size = { 400, 200 };
+    bg.size = { 400, 100 };
+    bg.scale = { 4.0, 4.0 };
 
     auto uiText = scene.createEntity("battleDialog-text");
     auto& uiTextTrans = uiText.addComponent<Engine::Components::TransformComponent>();
-    uiTextTrans.Position = { 10, 10 };
+    uiTextTrans.Position = { 20, 20 };
     uiText.setParent(uiBg);
 
     auto& textComp = uiText.addComponent<Engine::Components::TextComponent>("Player turn");
@@ -137,7 +133,82 @@ void createBattleScene(Engine::Scene& scene) {
 
 
     auto statsOne = ceateEntStatsDisplay("statsDisplayTop", scene);
+    auto& statsOneTrans = statsOne.getComponent<Engine::Components::TransformComponent>();
+    statsOneTrans.Position = { 170.0, 200.0 };
     auto statsTwo = ceateEntStatsDisplay("statsDisplayBottom", scene);
-    auto& t = statsTwo.getComponent<Engine::Components::TransformComponent>();
-    t.Position.y += 80;
+    auto& statsTwoTrans = statsTwo.getComponent<Engine::Components::TransformComponent>();
+    statsTwoTrans.Position = { 440.0, 410.0 };
+
+
+    // player sprite
+    auto playerSprite = scene.createEntity("playerSprite");
+    auto& plSTrans = playerSprite.addComponent<Engine::Components::TransformComponent>();
+    plSTrans.Position = { 60.0, 320.0 };
+    Engine::Renderer::Material plSprite = { scene.m_TextureManager->getTexture(3), { 256.0, 0.0, 32.0,32.0 } };
+    auto& plSSprite = playerSprite.addComponent<Engine::Components::SpriteComponent>(plSprite);
+    plSSprite.scale = { 8.0, 8.0 };
+    plSSprite.zIndex = 1;
+    auto playerShadow = scene.createEntity();
+    auto& plShadowTrans = playerShadow.addComponent<Engine::Components::TransformComponent>();
+    plShadowTrans.Position = { 50.0, 185.0 };
+    playerShadow.setParent(playerSprite);
+    Engine::Renderer::Material shadow = { scene.m_TextureManager->getTexture(8), { 0.0, 0.0, 16.0, 6.0 } };
+    auto& plSShadowprite = playerShadow.addComponent<Engine::Components::SpriteComponent>(shadow);
+    plSShadowprite.scale = { 10.0, 10.0 }; 
+    auto battleGroundBottom = scene.createEntity();
+    auto& battleGroundBTrans = battleGroundBottom.addComponent<Engine::Components::TransformComponent>();
+    battleGroundBTrans.Position = { -180.0, 75.0 };
+    battleGroundBottom.setParent(playerSprite);
+    Engine::Renderer::Material battleGroundMat = { scene.m_TextureManager->getTexture(12), { 0.0, 0.0, 64.0, 32.0 } };
+    auto& battleGroundBSprite = battleGroundBottom.addComponent<Engine::Components::SpriteComponent>(battleGroundMat);
+    battleGroundBSprite.scale = { 10.0, 10.0 };
+    
+    //rat sprite
+    auto ratSprite = scene.createEntity("ratSprite");
+    auto& ratSTrans = ratSprite.addComponent<Engine::Components::TransformComponent>();
+    ratSTrans.Position = { 440.0 , 90.0 };
+    Engine::Renderer::Material ratSSprite = { scene.m_TextureManager->getTexture(11), { 0.0, 0.0, 32.0,32.0 } };
+    auto& ratSSSprite = ratSprite.addComponent<Engine::Components::SpriteComponent>(ratSSprite);
+    ratSSSprite.scale = { 6.0, 6.0 };
+    ratSSSprite.zIndex = 1;
+    auto ratShadow = scene.createEntity();
+    auto& ratShadowTrans = ratShadow.addComponent<Engine::Components::TransformComponent>();
+    ratShadowTrans.Position = { 30.0, 165.0 };
+    ratShadow.setParent(ratSprite);
+    auto& ratSShadowprite = ratShadow.addComponent<Engine::Components::SpriteComponent>(shadow);
+    ratSShadowprite.scale = { 8.0, 8.0 };
+    auto battleGroundTop = scene.createEntity();
+    auto& battleGroundTTrans = battleGroundTop.addComponent<Engine::Components::TransformComponent>();
+    battleGroundTTrans.Position = { -150.0, 60.0 };
+    battleGroundTop.setParent(ratSprite);
+    auto& battleGroundTSprite = battleGroundTop.addComponent<Engine::Components::SpriteComponent>(battleGroundMat);
+    battleGroundTSprite.scale = { 8.0, 8.0 };
+
+
+    // attack menu
+    
+    auto attackMenu = scene.createEntity("attackMenu");
+    auto& attackMenuTras = attackMenu.addComponent<Engine::Components::TransformComponent>();
+    attackMenuTras.Position = { 850.0, 160.0 };
+    
+    auto weapnShow = scene.createEntity("weaponShow");
+    auto& waeponShowTrans = weapnShow.addComponent<Engine::Components::TransformComponent>();
+    weapnShow.setParent(attackMenu);
+    auto& weaponBg = weapnShow.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
+    weaponBg.size = { 200, 250 };
+    weaponBg.scale = { 4.0, 4.0 };
+
+    
+    auto weapon = scene.createEntity("weaponSprite");
+    weapon.setParent(weapnShow);
+    auto& weponSpriteImage = weapon.addComponent<Engine::Components::ImageComponent>();
+    weponSpriteImage.scale = { 5.0, 5.0 };
+    auto& weaponTrans = weapon.addComponent<Engine::Components::TransformComponent>();
+    weaponTrans.Position = { 20.0, 45 };
+    
+    auto attacksList = scene.createEntity("attackList");
+    attacksList.setParent(attackMenu);
+    auto& attackListTrans = attacksList.addComponent<Engine::Components::TransformComponent>();
+    attackListTrans.Position = { 230.0, 0.0 };
+    
 }

@@ -26,7 +26,7 @@ void Engine::SceneManager::tick() {
 
 void Engine::SceneManager::loadSceneNow(int id) {
 	printf("Loading scene %d...\n", id);
-	Engine::Scene scene(m_TxtManager, m_FontManager, this);
+	Engine::Scene scene(m_TxtManager, m_FontManager, this, &m_GlobalStorage);
 
 	scene.m_Renderer2D = &m_Renderer2D;
 	scene.m_RendererUI = &m_RendererUI;

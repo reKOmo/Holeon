@@ -7,6 +7,7 @@ struct EntityStats {
 	float defence = 1.0;
 	float baseDefence = 1.0;
 	int level = 10;
+	int xp = 0;
 	std::string name = "Ent";
 	Weapon currentWeapon;
 };

@@ -16,7 +16,7 @@ namespace Engine {
         */
         virtual void onInit() {}
         double duration = 0;
-        friend void Engine::Systems::Animator::updateAnimations(entt::registry& scene, float delta);
+        friend void Engine::Systems::Animator::updateAnimations(entt::registry& scene, float delta, float);
         friend struct Engine::Components::AnimationManager;
     protected:
         bool loop = false;

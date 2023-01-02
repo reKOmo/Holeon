@@ -17,14 +17,15 @@ void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 		auto [background, transform, info] = backgrounds.get(ent);
 
 		if (!info.disabled) {
-			frameShader.SetValue(positionLocation, &background.size, SHADER_UNIFORM_VEC2);
+			raylib::Vector2 newSize = { background.size.x / background.scale.x, background.size.y / background.scale.y };
+			frameShader.SetValue(positionLocation, &newSize, SHADER_UNIFORM_VEC2);
 			BeginShaderMode(frameShader);
 			Entity e = { ent, registry };
 			auto absTransform = getAbsoluteTransform(e);
 
 			raylib::Rectangle source = background.material.tilePlot;
 
-			raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, background.size.x * background.scale.x, background.size.y * background.scale.y };
+			raylib::Rectangle destination = { absTransform.Position.x, absTransform.Position.y, background.size.x, background.size.y };
 
 			DrawTexturePro(Texture(*background.material.texture), source, destination, background.origin, absTransform.Rotation, background.tint);
 			EndShaderMode();
@@ -60,14 +61,16 @@ void Engine::Renderer::UIRenderer::render(entt::registry* registry) {
 	for (auto ent : images) {
 		auto& [sprite, transform, info] = images.get<Engine::Components::ImageComponent, Engine::Components::TransformComponent, Engine::Components::InfoComponent>(ent);
 
-		Entity e = { ent, registry };
-		auto absTransform = getAbsoluteTransform(e);
+		if (!info.disabled) {
+			Entity e = { ent, registry };
+			auto absTransform = getAbsoluteTransform(e);
 
-		raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
+			raylib::Rectangle source = sprite.imageIndex == 0 ? sprite.material.tilePlot : getPlotByIndex(sprite.imageIndex, sprite.material);
 
-		raylib::Rectangle destination = { absTransform.Position.x - sprite.origin.x * sprite.scale.x, absTransform.Position.y - sprite.origin.y * sprite.scale.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
+			raylib::Rectangle destination = { absTransform.Position.x - sprite.origin.x * sprite.scale.x, absTransform.Position.y - sprite.origin.y * sprite.scale.y, sprite.material.tilePlot.width * sprite.scale.x, sprite.material.tilePlot.height * sprite.scale.x };
 
 
-		DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
+			DrawTexturePro(Texture(*sprite.material.texture), source, destination, sprite.origin, absTransform.Rotation, sprite.tint);
+		}
 	}
 }

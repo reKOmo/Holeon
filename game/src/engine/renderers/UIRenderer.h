@@ -12,5 +12,6 @@ namespace Engine::Renderer {
 	private:
 		raylib::Shader frameShader = LoadShader(0, RESOURCE_PATH("frame-renderer.fs"));
 		int positionLocation = -1;
+		int scaleLocation = -1;
 	};
 }

@@ -6,7 +6,7 @@ Engine::Entity createDialogButton(std::string text, std::string name, int value,
     const int spacing = 2;
     raylib::Vector2 textSize = f->MeasureText(text, fontSize, spacing);
     const float scale = 1.0;
-    const float textOffset = 10;
+    const float textOffset = 20;
 
 
 

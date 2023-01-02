@@ -22,7 +22,7 @@ void main()
 {
     vec2 newPos = fragTexCoord;
 
-    vec2 pixelPos = vec2(fragTexCoord.x * spriteSize.x, fragTexCoord.y * spriteSize.y);
+     vec2 pixelPos = vec2((fragTexCoord.x * spriteSize.x), (fragTexCoord.y * spriteSize.y));
     
     if (pixelPos.x > TILE_SIZE) {
         if (pixelPos.x < spriteSize.x - TILE_SIZE) {
@@ -46,7 +46,7 @@ void main()
         newPos.y = pixelPos.y / float(TEXTURE_SIZE);
     }
 
-    
+
    vec4 texelColor = texture(texture0, newPos)*colDiffuse*fragColor;
    finalColor = texelColor;
 }

@@ -1,15 +1,16 @@
 #pragma once
 #include "Engine.h"
+#include "EntityStats.h"
 #include <functional>
 
 class StatsDisplay : public Engine::Script {
 public:
 	void onCreate();
 	void onUpdate(float delta);
-	void setTargetEntity(Engine::Entity);
+	void setTarget(EntityStats* stats);
 	void updateHp(std::function<void()> call);
 private:
-	Engine::Entity target;
+	EntityStats* target;
 	Engine::Entity fillBar;
 	Engine::Entity nameText;
 	Engine::Entity levelText;

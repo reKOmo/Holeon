@@ -4,6 +4,7 @@
 #include "SpriteAnimator.h"
 #include "LevelManager.h"
 #include "SceneSwitcher.h"
+#include "EntityStats.h"
 #include <memory>
 
 void createWorldScene(Engine::Scene& scene) {
@@ -20,6 +21,8 @@ void createWorldScene(Engine::Scene& scene) {
     
 
     auto player = scene.createEntity("player");
+    auto& info = player.getComponent<Engine::Components::InfoComponent>();
+    info.tags.push_back("pauseable");
     auto& playerTransform = player.addComponent<Engine::Components::TransformComponent>();
     playerTransform.Position = { 608.0, 288.0 };
     Engine::Renderer::Material playerSpriteMat = { scene.m_TextureManager->getTexture(3), { 0.0, 0.0, 32.0, 32.0 } };
@@ -38,6 +41,27 @@ void createWorldScene(Engine::Scene& scene) {
     auto& colider = player.addComponent<Engine::Components::ColiderComponent>();
     colider.plot = {9.0, 18.0, 14.0, 10.0};
     auto& rigidbody = player.addComponent<Engine::Components::RigidbodyComponent>();
+
+    // player stats
+    if (!scene.m_GlobalStorage->has("playerStats")) {
+        EntityStats* playerStats = scene.m_GlobalStorage->emplace<EntityStats>("playerStats");
+        playerStats->name = "Player";
+        playerStats->xp = 330;
+        playerStats->currentWeapon.attacks[0] = {
+            "Slash",
+            5.0,
+            Attack::DAMAGE
+        };
+        playerStats->currentWeapon.attacks[1] = {
+            "Boost",
+            0.2,
+            Attack::ATK_BOOST
+        };
+    }
+
+
+
+
 
     auto shadowEnt = scene.createEntity("shadow");
     auto& shadowTrans = shadowEnt.addComponent<Engine::Components::TransformComponent>();
@@ -59,8 +83,9 @@ void createWorldScene(Engine::Scene& scene) {
     auto& transitionTrans = transition.addComponent<Engine::Components::TransformComponent>();
     transitionTrans.Position = { 640, 360 };
     transition.addComponent<Engine::Components::ScriptComponent>().bind<SceneSwitcher>();
-    transition.addComponent<Engine::Components::AnimationManager>();
-    
+    auto& transitionAnimMgr = transition.addComponent<Engine::Components::AnimationManager>();
+    transitionAnimMgr.useUnscaledTime = true;
+
     auto transitionBG = scene.createEntity("battle-transitionBG");
     Engine::Renderer::Material transitionMatBG = { scene.m_TextureManager->getTexture(10), { 0.0, 0.0, 32.0, 32.0 } };
     auto& transitionMatCompBG = transitionBG.addComponent<Engine::Components::ImageComponent>(transitionMat);

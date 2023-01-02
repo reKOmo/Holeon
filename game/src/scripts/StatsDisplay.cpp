@@ -1,5 +1,4 @@
 #include "StatsDisplay.h"
-#include "EntityStats.h"
 #include "HpBarAnimation.h"
 
 void StatsDisplay::onCreate() {
@@ -21,18 +20,17 @@ void StatsDisplay::onCreate() {
 void StatsDisplay::onUpdate(float delta) {
 }
 
-void StatsDisplay::setTargetEntity(Engine::Entity t) {
+void StatsDisplay::setTarget(EntityStats* t) {
 	target = t;
-	auto& stats = target.getComponent<EntityStats>();
-	nameText.getComponent<Engine::Components::TextComponent>().text = stats.name;
-	levelText.getComponent<Engine::Components::TextComponent>().text = stats.level;
-	setHpInstant(stats.health, stats.maxHelath);
+
+	nameText.getComponent<Engine::Components::TextComponent>().text = target->name;
+	std::string levelTxt = "Lv. ";
+	levelText.getComponent<Engine::Components::TextComponent>().text = levelTxt + std::to_string(target->level);
+	setHpInstant(target->health, target->maxHelath);
 }
 
 void StatsDisplay::updateHp(std::function<void()> call) {
-	auto& stats = target.getComponent<EntityStats>();
-	float p = stats.health / stats.maxHelath;
-	printf("Stats in dispaly: %f", stats.health);
+	float p = target->health / target->maxHelath;
 
 	auto& animMgr = fillBar.getComponent<Engine::Components::AnimationManager>();
 	HpBarAnimation* a = dynamic_cast<HpBarAnimation*>(animMgr.animations[0].get());

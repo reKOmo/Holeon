@@ -4,12 +4,13 @@
 #include "Scene.h"
 #include "Renderer2D.h"
 #include "UIRenderer.h"
+#include "Collection.h"
 
 namespace Engine {
 	class SceneManager {
 	public:
 		SceneManager(Engine::Renderer::TextureManager* txt, Engine::Renderer::FontManager* ft)
-			: m_TxtManager(txt), m_FontManager(ft), m_ActiveScene(txt, ft, this) {}
+			: m_TxtManager(txt), m_FontManager(ft), m_ActiveScene(txt, ft, this, &m_GlobalStorage) {}
 
 		void loadScene(int id);
 		Engine::Scene& getActveScene() {
@@ -32,5 +33,6 @@ namespace Engine {
 		Engine::Renderer::FontManager* m_FontManager;
 		Engine::Renderer::Renderer2D m_Renderer2D;
 		Engine::Renderer::UIRenderer m_RendererUI;
+		Engine::Collection<std::string> m_GlobalStorage;
 	};
 }

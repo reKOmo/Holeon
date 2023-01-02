@@ -10,7 +10,8 @@ namespace Engine{
 
 	Entity Scene::createEntity(std::string name) {
 		Entity e = { m_Registry.create(), &m_Registry };
-		auto& info = e.addComponent<Engine::Components::InfoComponent>();
+		auto& info = e.addComponent<Engine::Components::InfoComponent>(m_NextEntId);
+		m_NextEntId++;
 		info.name = name == "" ? "Entity" : name;
 		return e;
 	}
@@ -39,7 +40,20 @@ namespace Engine{
 		return Entity();
 	}
 
+	std::vector<Engine::Entity> Scene::getEntitiesByTag(std::string tag) {
+		std::vector<Engine::Entity> found;
+		
+		m_Registry.view<Engine::Components::InfoComponent>().each([&, tag](const auto ent, const auto& info) {
+			if (Engine::findIndex(info.tags, tag) != -1) {
+				found.push_back({ ent, &m_Registry });
+			}
+		});
+
+		return found;
+	}
+
 	void Scene::update() {
+		m_DeltaTime = GetFrameTime();
 		/*
 			1. Update scripts
 			3. Update rigidbodies
@@ -52,12 +66,12 @@ namespace Engine{
 				script.instance->m_Scene = this;
 				script.instance->onCreate();
 			}
-			if (!info.disabled) {
-				script.instance->onUpdate(GetFrameTime());
+			if (!info.disabled && !script.paused) {
+				script.instance->onUpdate(deltaTime());
 			}
 		});
-		m_RigidMganager.update(&m_Registry, GetFrameTime());
-		Engine::Systems::Animator::updateAnimations(m_Registry, GetFrameTime());
+		m_RigidMganager.update(&m_Registry, deltaTime());
+		Engine::Systems::Animator::updateAnimations(m_Registry, deltaTime(), unscaledDeltaTime());
 	}
 
 	void Scene::render() {

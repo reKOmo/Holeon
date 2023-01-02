@@ -11,16 +11,16 @@ void ButtonManager::onCreate() {
 void ButtonManager::onUpdate(float delta) {
     // less repeated code but worse performance
     auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
-    if (IsKeyPressed(KEY_DOWN)) {
+    if (IsKeyPressed(KEY_S)) {
         switchToButton(currComp.bottom);
     }
-    else if (IsKeyPressed(KEY_UP)) {
+    else if (IsKeyPressed(KEY_W)) {
         switchToButton(currComp.top);
     }
-    else if (IsKeyPressed(KEY_LEFT)) {
+    else if (IsKeyPressed(KEY_A)) {
         switchToButton(currComp.left);
     }
-    else if (IsKeyPressed(KEY_RIGHT)) {
+    else if (IsKeyPressed(KEY_D)) {
         switchToButton(currComp.right);
     }
 

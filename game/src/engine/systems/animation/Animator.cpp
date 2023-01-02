@@ -4,8 +4,9 @@
 namespace Engine {
     namespace Systems {
         namespace Animator {
-            void updateAnimations(entt::registry& scene, float delta) {
+            void updateAnimations(entt::registry& scene, float delta, float unscaledDelta) {
                 scene.view<Engine::Components::AnimationManager>().each([&](entt::entity ent, Engine::Components::AnimationManager& mgr) {
+                    float d = mgr.useUnscaledTime ? unscaledDelta : delta;
                     for (auto& clip : mgr.currentlyPlaying) {
                         if (!clip->m_Owner) {
                             clip->m_Owner = { ent, &scene };
@@ -15,8 +16,8 @@ namespace Engine {
                             clip->onInit();
                             clip->initialized = true;
                         }
-                        clip->onUpdate(delta);
-                        clip->currentPlaytime += delta;
+                        clip->onUpdate(d);
+                        clip->currentPlaytime += d;
                     }
                 for (int i = mgr.currentlyPlaying.size() - 1; i >= 0; i--) {
                     const auto& clipPtr = mgr.currentlyPlaying[i];
