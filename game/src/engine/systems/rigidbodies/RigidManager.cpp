@@ -54,7 +54,9 @@ void Engine::Systems::RigidbodyManager::update(entt::registry* scene, float delt
 					if (absPlot.CheckCollision(susAbsPlot)) {
 						colidesWith.push_back(susEnt);
 						auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
-						script.instance->onTrigger({ susEnt, scene });
+						if (script) {
+							script.instance->onTrigger({ susEnt, scene });
+						}
 					}
 				}
 			}
@@ -66,13 +68,17 @@ void Engine::Systems::RigidbodyManager::update(entt::registry* scene, float delt
 				}
 				else {
 					auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
-					script.instance->onTriggerEnter({ col, scene });
+					if (script) {
+						script.instance->onTriggerEnter({ col, scene });
+					}
 				}
 			}
 			// exited coliders
 			for (auto& col : colider.colidingWith) {
 				auto& script = scene->get<Engine::Components::ScriptComponent>(ent);
-				script.instance->onTriggerExit({ col, scene });
+				if (script) {
+					script.instance->onTriggerExit({ col, scene });
+				}
 			}
 			// replace
 			colider.colidingWith = std::move(colidesWith);

@@ -29,8 +29,8 @@ Engine::Entity createDialog(Engine::Scene* scene) {
 Engine::Entity createPickContainer(Engine::Scene* scene) {
 	auto battleUI = scene->createEntity("optionsList");
 	auto& trans = battleUI.addComponent<Engine::Components::TransformComponent>();
-	trans.Position = { 0.0, -150.0 };
-	battleUI.setParent(scene->getEntityByName("dialogContainer"));
+	trans.Position = { (float)640.0 - (float)225.0f, 350.0};
+	//battleUI.setParent(scene->getEntityByName("dialogContainer"));
 	battleUI.addComponent<Engine::Components::ScriptComponent>().bind<ButtonManager>();
 	auto& uiMgrData = battleUI.addComponent<Engine::Components::ButtonManagerData>();
 
@@ -79,7 +79,10 @@ void DialogManager::onUpdate(float delta) {
 		onEnd();
 		endInteraction = false;
 		unpauseGame();
-		optionsEnt = Engine::Entity();
+		if (optionsEnt) {
+			getSceneManager().getActveScene().removeEntity(optionsEnt);
+			optionsEnt = Engine::Entity();
+		}
 		onEndQuestion(pickedValue);
 		optionsSelectOn = false;
 	}

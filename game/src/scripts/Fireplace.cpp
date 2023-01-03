@@ -51,6 +51,9 @@ void Fireplace::onInteract(std::function<void()> onDone) {
 				onDone();
 			});
 		}
+		else {
+			onDone();
+		}
 	});
 	
 }

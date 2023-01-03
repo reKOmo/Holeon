@@ -27,6 +27,11 @@ namespace Engine{
 		for (auto c : children) {
 			removeEntity(c);
 		}
+		if (e.getParent()) {
+			auto& children2 = e.getParent().getChildren();
+			int index = Engine::findIndex(children2, e);
+			children2.erase(children2.begin() + index);
+		}
 
 		m_Registry.destroy(e.m_EnttID);
 	}
