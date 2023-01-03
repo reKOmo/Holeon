@@ -6,6 +6,8 @@
 #include "SceneSwitcher.h"
 #include "EntityStats.h"
 #include <memory>
+#include "DialogManager.h"
+#include "Interactor.h"
 
 void createWorldScene(Engine::Scene& scene) {
     scene.setBackgroundColor({3, 3, 5, 255});
@@ -41,6 +43,15 @@ void createWorldScene(Engine::Scene& scene) {
     auto& colider = player.addComponent<Engine::Components::ColiderComponent>();
     colider.plot = {9.0, 18.0, 14.0, 10.0};
     auto& rigidbody = player.addComponent<Engine::Components::RigidbodyComponent>();
+    //player interactor
+    auto playerInteractor = scene.createEntity("playerInteractor");
+    playerInteractor.getComponent<Engine::Components::InfoComponent>().tags.push_back("pauseable");
+    playerInteractor.setParent(player);
+    playerInteractor.addComponent<Engine::Components::TransformComponent>();
+    auto& interactorColider = playerInteractor.addComponent<Engine::Components::ColiderComponent>();
+    interactorColider.plot = { 0.0, 0.0, 10.0, 10.0 };
+    interactorColider.trigger = true;
+    playerInteractor.addComponent<Engine::Components::ScriptComponent>().bind<Interactor>();
 
     // player stats
     if (!scene.m_GlobalStorage->has("playerStats")) {
@@ -95,5 +106,8 @@ void createWorldScene(Engine::Scene& scene) {
     transitionMatCompBG.scale = { 0.0, 0.0 };
     auto& transitionTransBG = transitionBG.addComponent<Engine::Components::TransformComponent>();
     transitionBG.setParent(transition);
+
+    auto dialogEnt = scene.createEntity("dialogManager");
+    dialogEnt.addComponent<Engine::Components::ScriptComponent>().bind<DialogManager>();
 
 }

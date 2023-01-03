@@ -25,6 +25,8 @@ int main(void) {
         RESOURCE_PATH("battle-transition.png"),
         RESOURCE_PATH("rat.png"),
         RESOURCE_PATH("battle-ground.png"),
+        RESOURCE_PATH("fireplace.png"),
+        RESOURCE_PATH("white-screen.png"),
     };
 
     char* fonts[] = {
@@ -32,7 +34,7 @@ int main(void) {
     };
 
     Engine::Renderer::TextureManager textureMgr;
-    textureMgr.loadFiles(files, 13);
+    textureMgr.loadFiles(files, 15);
 
     Engine::Renderer::FontManager fontMgr;
     fontMgr.loadFiles(fonts, 1);

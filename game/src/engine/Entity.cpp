@@ -44,4 +44,14 @@ namespace Engine {
 	std::vector<Engine::Entity> Entity::getChildren() {
 		return getComponent<Engine::Components::InfoComponent>().m_Children;
 	}
+
+	void Entity::removeChild(Engine::Entity child) {
+		auto& info = getComponent<Engine::Components::InfoComponent>();
+		int index = Engine::findIndex(info.m_Children, child);
+		if (index != -1) {
+			info.m_Children.erase(info.m_Children.begin() + index);
+			if (child.hasComponent<Engine::Components::InfoComponent>())
+				child.getComponent<Engine::Components::InfoComponent>().m_Parent = {};
+		}
+	}
 }

@@ -9,6 +9,7 @@ namespace Attack {
 		DEF_BOOST,
 		ATK_BOOST,
 		SPD_BOOST,
+		HEAL,
 		NULL_ATK
 	};
 }

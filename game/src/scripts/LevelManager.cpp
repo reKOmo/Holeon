@@ -1,5 +1,8 @@
 #include "LevelManager.h"
 #include "NestTrap.h"
+#include "TempWorldData.h"
+#include "Fireplace.h"
+#include "Inventory.h"
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -18,6 +21,21 @@ Engine::Entity createGrass(Engine::Scene* scene) {
 	grass.addComponent<Engine::Components::TransformComponent>();
 	Engine::Renderer::Material mat = { scene->m_TextureManager->getTexture(2), {0.0, 0.0, 32.0, 32.0} };
 	grass.addComponent<Engine::Components::SpriteComponent>(mat);
+
+	return grass;
+}
+
+Engine::Entity createFireplace(Engine::Scene* scene) {
+	auto grass = scene->createEntity("fireplace");
+	auto& info = grass.getComponent<Engine::Components::InfoComponent>();
+	info.tags.push_back("interactable");
+	grass.addComponent<Engine::Components::TransformComponent>();
+	Engine::Renderer::Material mat = { scene->m_TextureManager->getTexture(13), {0.0, 0.0, 32.0, 32.0} };
+	grass.addComponent<Engine::Components::SpriteComponent>(mat);
+	grass.addComponent<Engine::Components::ScriptComponent>().bind<Fireplace>();
+	auto& colider = grass.addComponent<Engine::Components::ColiderComponent>();
+	colider.plot = { 4.0, 20.0, 26.0, 12.0 };
+	grass.addComponent<Engine::Components::RigidbodyComponent>();
 
 	return grass;
 }
@@ -44,6 +62,11 @@ Engine::Entity createNest(Engine::Scene* scene) {
 }
 
 void LevelManager::onCreate() {
+	/*
+		====================
+			LOAD LEVEL
+		====================
+	*/
 	std::fstream file;
 	file.open(RESOURCE_PATH("Holeon - test map 1.json"), std::ios::in);
 	
@@ -83,7 +106,37 @@ void LevelManager::onCreate() {
 					auto& trans = ent.getComponent<Engine::Components::TransformComponent>();
 					trans.Position = { ob["x"].get<float>(), ob["y"].get<float>() - ob["height"].get<float>() };
 				}
+			}else if (layer["name"] == "fireplaces") {
+				for (auto& ob : layer["objects"]) {
+					auto ent = Instattiate(createFireplace);
+					auto& trans = ent.getComponent<Engine::Components::TransformComponent>();
+					trans.Position = { ob["x"].get<float>(), ob["y"].get<float>() - ob["height"].get<float>() };
+				}
 			}
 		}
+	}
+
+	/*
+		====================
+			SET TEMP DATA
+		====================
+	*/
+	if (!getGlobalStorage().has("tempWorldData")) {
+		getGlobalStorage().emplace<TempWorldData>("tempWorldData");
+	}
+	else {
+		auto data = getGlobalStorage().get<TempWorldData>("tempWorldData");
+		//playerPos
+		if (data->returnToFireplace) {
+			getEntityByName("player").getComponent<Engine::Components::TransformComponent>().Position = data->lastSleppPosition;
+			data->returnToFireplace = false;
+		}
+		else {
+			getEntityByName("player").getComponent<Engine::Components::TransformComponent>().Position = data->playerPosition;
+		}
+	}
+
+	if (!getGlobalStorage().has("inventory")) {
+		auto inv = getGlobalStorage().emplace<Inventory>("inventory");
 	}
 }

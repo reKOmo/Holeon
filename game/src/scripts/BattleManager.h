@@ -28,10 +28,10 @@ public:
 	void onUpdate(float);
 private:
 	BATTLE_STATE state = PLAYER_TURN;
-	Engine::Entity attacksListUI;
-	Engine::Entity attackUI;
-	EntityStats* playerStats;
+	bool showingPlayerUI = false;
+	Engine::Entity playerUIManager;
 	EntityStats* opponentStats;
+	EntityStats* playerStats;
 	Engine::Entity battleProgressDialog;
 	Engine::Entity statDisplayPlayer;
 	Engine::Entity statDisplayOpponent;
@@ -41,6 +41,7 @@ private:
 	DAMAGE_TURN_STAGES currentDamageStage = SETUP;
 	DAMAGE_TURN_STAGES nextDamageStage = INVALID;
 	int playerPickedAtk = 0;
+	Player::Action playerPickedAction = Player::DEAL_DAMAGE;
 	int opponentPickedAtk = 0;
 	bool waitingForAccept = false;
 	void playerTurn();
@@ -57,4 +58,5 @@ private:
 	void levelUpPhase();
 	void endBattlePhase();
 	void checkHealth();
+	void performPlayerAction();
 };

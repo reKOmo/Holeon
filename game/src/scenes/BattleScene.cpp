@@ -7,6 +7,7 @@
 #include "HpBarAnimation.h"
 #include "StatsDisplay.h"
 #include "CameraController.h"
+#include "BattlePlayerUI.h"
 
 Engine::Entity ceateEntStatsDisplay(std::string name, Engine::Scene& scene) {
     //background
@@ -184,31 +185,7 @@ void createBattleScene(Engine::Scene& scene) {
     auto& battleGroundTSprite = battleGroundTop.addComponent<Engine::Components::SpriteComponent>(battleGroundMat);
     battleGroundTSprite.scale = { 8.0, 8.0 };
 
-
-    // attack menu
-    
-    auto attackMenu = scene.createEntity("attackMenu");
-    auto& attackMenuTras = attackMenu.addComponent<Engine::Components::TransformComponent>();
-    attackMenuTras.Position = { 850.0, 160.0 };
-    
-    auto weapnShow = scene.createEntity("weaponShow");
-    auto& waeponShowTrans = weapnShow.addComponent<Engine::Components::TransformComponent>();
-    weapnShow.setParent(attackMenu);
-    auto& weaponBg = weapnShow.addComponent<Engine::Components::BackgroundComponent>(dialogFrame);
-    weaponBg.size = { 200, 250 };
-    weaponBg.scale = { 4.0, 4.0 };
-
-    
-    auto weapon = scene.createEntity("weaponSprite");
-    weapon.setParent(weapnShow);
-    auto& weponSpriteImage = weapon.addComponent<Engine::Components::ImageComponent>();
-    weponSpriteImage.scale = { 5.0, 5.0 };
-    auto& weaponTrans = weapon.addComponent<Engine::Components::TransformComponent>();
-    weaponTrans.Position = { 20.0, 45 };
-    
-    auto attacksList = scene.createEntity("attackList");
-    attacksList.setParent(attackMenu);
-    auto& attackListTrans = attacksList.addComponent<Engine::Components::TransformComponent>();
-    attackListTrans.Position = { 230.0, 0.0 };
+    auto uiManager = scene.createEntity("uiManager");
+    uiManager.addComponent<Engine::Components::ScriptComponent>().bind<BattleUIPlayer>();
     
 }

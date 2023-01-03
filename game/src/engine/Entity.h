@@ -32,6 +32,7 @@ namespace Engine {
 		Engine::Entity getParent();
 		void setParent(Engine::Entity p);
 		std::vector<Engine::Entity> getChildren();
+		void removeChild(Engine::Entity child);
 
 		bool disabled();
 		void disable();
@@ -42,6 +43,9 @@ namespace Engine {
 		}
 		bool operator ==(const Entity& other) const {
 			return m_EnttID == other.m_EnttID;
+		}
+		bool operator !=(const Entity& other) const {
+			return m_EnttID != other.m_EnttID;
 		}
 		bool operator <(const Entity& other) const {
 			return m_EnttID < other.m_EnttID;

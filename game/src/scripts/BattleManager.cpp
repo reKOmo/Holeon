@@ -4,47 +4,18 @@
 #include "EntityStats.h"
 #include "Helpers.h"
 #include "StatsDisplay.h"
+#include "TempWorldData.h"
+#include "BattlePlayerUI.h"
 
 #include <format>
 
 void BattleManager::onCreate() {
+	playerUIManager = getEntityByName("uiManager");
+
 	playerStats = getGlobalStorage().get<EntityStats>("playerStats");
 	opponentStats = getGlobalStorage().get<EntityStats>("opponentStats");
 
 	battleProgressDialog = getEntityByName("battleDialog");
-	attacksListUI = Instattiate([&](Engine::Scene* scene) {
-		Engine::Entity buttons[Attack::maxAttacks];
-
-		auto battleUI = scene->getEntityByName("attackList");
-		
-
-		battleUI.addComponent<Engine::Components::ScriptComponent>().bind<ButtonManager>();
-		auto& uiMgrData = battleUI.addComponent<Engine::Components::ButtonManagerData>();
-
-		auto& weapon = playerStats->currentWeapon;
-		for (int i = 0; i < Attack::maxAttacks; i++) {
-			if (weapon.attacks[i]) {
-				auto button = createDialogButton(weapon.attacks[i].name, "button", i, scene);
-				button.getComponent<Engine::Components::BackgroundComponent>().scale = { 4.0, 4.0 };
-				if (i > 0) {
-					button.getComponent<Engine::Components::ButtonComponent>().top = buttons[i - 1];
-					buttons[i - 1].getComponent<Engine::Components::ButtonComponent>().bottom = button;
-
-					auto& buttonTrans = button.getComponent<Engine::Components::TransformComponent>();
-					buttonTrans.Position = { 0.0, (float)i * 70.0f };
-				}
-				button.setParent(battleUI);
-				if (i == 0) {
-					uiMgrData.currentButton = button;
-				}
-				buttons[i] = button;
-			}
-		}
-
-		return battleUI;
-	});
-	attackUI = getEntityByName("attackMenu");
-	attackUI.disable();
 
 	statDisplayPlayer = getEntityByName("statsDisplayBottom");
 	statDisplayOpponent = getEntityByName("statsDisplayTop");
@@ -52,9 +23,6 @@ void BattleManager::onCreate() {
 	dis1->setTarget(opponentStats);
 	auto dis2 = dynamic_cast<StatsDisplay*>(statDisplayPlayer.getComponent<Engine::Components::ScriptComponent>().instance);
 	dis2->setTarget(playerStats);
-
-	auto weaponSprite = getEntityByName("weaponSprite");
-	weaponSprite.getComponent<Engine::Components::ImageComponent>().material = { getSceneManager().getActveScene().m_TextureManager->getTexture(0), {0.0, 0.0, 32.0, 32.0} };
 }
 
 void BattleManager::onUpdate(float delta) {
@@ -71,29 +39,22 @@ void BattleManager::onUpdate(float delta) {
 }
 
 void BattleManager::playerTurn() {
-	if (attackUI.disabled()) {
-		auto& script = attacksListUI.getComponent<Engine::Components::ScriptComponent>();
-		if (script) {
-			auto buttonMgr = dynamic_cast<ButtonManager*>(script.instance);
-			buttonMgr->onSelect([&](int val) {
-				state = DEAL_DAMAGE;
-				justSwitched = true;
-				playerPickedAtk = val;
-			});
-			attackUI.enable();
-			battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 440.0;
-			auto& children = battleProgressDialog.getChildren();
-			auto& text = children[0].getComponent<Engine::Components::TextComponent>();
-			text.text = "Pick next move";
-		}
+	auto script = playerUIManager.getComponent<Engine::Components::ScriptComponent>().instance;
+	if (script && !showingPlayerUI) {
+		auto mgr = dynamic_cast<BattleUIPlayer*>(script);
+		mgr->performAction([&](auto& a) {
+			auto& [actionType, value] = a;
+			playerPickedAtk = value;
+			playerPickedAction = actionType;
+			battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 300.0;
+			showingPlayerUI = false;
+			state = DEAL_DAMAGE;
+		});
+		showingPlayerUI = true;
 	}
 }
 
 void BattleManager::damageTurn() {
-	if (!attackUI.disabled()) {
-		attackUI.disable();
-		battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 300.0;
-	}
 	if (justSwitched) {
 		justSwitched = false;
 	}
@@ -186,6 +147,7 @@ void BattleManager::playerLostPhase() {
 	auto& children = battleProgressDialog.getChildren();
 	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
 	text.text = playerStats->name + "'s condition fatal...\nFleeing";
+	currentDamageStage = END_BATTLE;
 	waitingForAccept = true;
 }
 
@@ -235,7 +197,9 @@ void BattleManager::levelUpPhase() {
 }
 
 void BattleManager::endBattlePhase() {
-
+	if (playerStats->health <= 0) {
+		getGlobalStorage().get<TempWorldData>("tempWorldData")->returnToFireplace = true;
+	}
 	getSceneManager().loadScene(0);
 }
 
@@ -248,6 +212,10 @@ void BattleManager::checkHealth() {
 		//opponent lost
 		currentDamageStage = OPPONENT_LOST;
 	}
+}
+
+void BattleManager::performPlayerAction() {
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 /*

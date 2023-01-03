@@ -47,7 +47,7 @@
                  "rotation":0,
                  "visible":true,
                  "width":32,
-                 "x":479.333333333333,
+                 "x":479.333,
                  "y":310
                 }, 
                 {
@@ -59,8 +59,8 @@
                  "rotation":0,
                  "visible":true,
                  "width":32,
-                 "x":325.666666666667,
-                 "y":342.666666666667
+                 "x":325.667,
+                 "y":342.667
                 }, 
                 {
                  "class":"",
@@ -73,6 +73,47 @@
                  "width":32,
                  "x":229,
                  "y":238
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":4,
+         "name":"fireplaces",
+         "objects":[
+                {
+                 "class":"",
+                 "gid":103,
+                 "height":32,
+                 "id":27,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"isSpawn",
+                         "type":"bool",
+                         "value":true
+                        }],
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":578,
+                 "y":319.333333333333
+                }, 
+                {
+                 "class":"",
+                 "gid":103,
+                 "height":32,
+                 "id":28,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":246.666666666667,
+                 "y":378
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -307,8 +348,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":4,
- "nextobjectid":24,
+ "nextlayerid":6,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",

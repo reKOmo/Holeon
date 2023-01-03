@@ -17,10 +17,11 @@ namespace Engine{
 	}
 
 	void Scene::removeEntity(Entity& e) {
-		auto& comp = e.getComponent<Components::ScriptComponent>();
-		comp.instance->onDestroy();
-		comp.destroyFunction(&comp);
-
+		if (e.hasComponent<Components::ScriptComponent>()) {
+			auto& comp = e.getComponent<Components::ScriptComponent>();
+			comp.instance->onDestroy();
+			comp.destroyFunction(&comp);
+		}
 		auto& children = e.getChildren();
 
 		for (auto c : children) {
@@ -34,6 +35,16 @@ namespace Engine{
 		auto view = m_Registry.view<Engine::Components::InfoComponent>();
 		for (auto ent : view) {
 			if (view.get<Engine::Components::InfoComponent>(ent).name == name) {
+				return { ent, &m_Registry };
+			}
+		}
+		return Entity();
+	}
+
+	Entity Scene::getEntityById(uint32_t id) {
+		auto view = m_Registry.view<Engine::Components::InfoComponent>();
+		for (auto ent : view) {
+			if (view.get<Engine::Components::InfoComponent>(ent).id() == id) {
 				return { ent, &m_Registry };
 			}
 		}

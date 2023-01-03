@@ -2,30 +2,47 @@
 
 void ButtonManager::onCreate() {
     currentButton = m_Owner.getComponent<Engine::Components::ButtonManagerData>().currentButton;
-    auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
-    currComp.isSelected = true;
-    auto& children = currentButton.getChildren();
-    children[0].getComponent<Engine::Components::TextComponent>().color = BLACK;
+    if (currentButton) {
+        auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
+        currComp.isSelected = true;
+        auto& children = currentButton.getChildren();
+        children[0].getComponent<Engine::Components::TextComponent>().color = BLACK;
+    }
 }
 
 void ButtonManager::onUpdate(float delta) {
-    // less repeated code but worse performance
-    auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
-    if (IsKeyPressed(KEY_S)) {
-        switchToButton(currComp.bottom);
-    }
-    else if (IsKeyPressed(KEY_W)) {
-        switchToButton(currComp.top);
-    }
-    else if (IsKeyPressed(KEY_A)) {
-        switchToButton(currComp.left);
-    }
-    else if (IsKeyPressed(KEY_D)) {
-        switchToButton(currComp.right);
+    if (currentButton != m_Owner.getComponent<Engine::Components::ButtonManagerData>().currentButton) {
+        currentButton = m_Owner.getComponent<Engine::Components::ButtonManagerData>().currentButton;
+        auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
+        currComp.isSelected = true;
+        auto& children = currentButton.getChildren();
+        children[0].getComponent<Engine::Components::TextComponent>().color = BLACK;
     }
 
-    if (IsKeyPressed(KEY_ENTER)) {
-        m_onSelect(currComp.value);
+    if (currentButton) {
+        auto& currComp = currentButton.getComponent<Engine::Components::ButtonComponent>();
+        if (!currComp.isSelected) {
+            currComp.isSelected = true;
+            auto& children = currentButton.getChildren();
+            children[0].getComponent<Engine::Components::TextComponent>().color = BLACK;
+        }
+
+        if (IsKeyPressed(KEY_S)) {
+            switchToButton(currComp.bottom);
+        }
+        else if (IsKeyPressed(KEY_W)) {
+            switchToButton(currComp.top);
+        }
+        else if (IsKeyPressed(KEY_A)) {
+            switchToButton(currComp.left);
+        }
+        else if (IsKeyPressed(KEY_D)) {
+            switchToButton(currComp.right);
+        }
+
+        if (IsKeyPressed(KEY_ENTER)) {
+            m_onSelect(currComp.value);
+        }
     }
 }
 

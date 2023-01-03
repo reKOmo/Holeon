@@ -39,18 +39,22 @@ void PlayerController::onUpdate(float delta) {
             switch (keystrokes.top()) {
             case KEY_A:
                 direction = { -speed, 0.0 };
+                facing = W;
                 currentAnimId = animManager.playAnimation(1);
                 break;
             case KEY_D:
                 direction = { speed, 0.0 };
+                facing = E;
                 currentAnimId = animManager.playAnimation(3);
                 break;
             case KEY_W:
                 direction = { 0.0, -speed };
+                facing = N;
                 currentAnimId = animManager.playAnimation(2);
                 break;
             case KEY_S:
                 direction = { 0.0, speed };
+                facing = S;
                 currentAnimId = animManager.playAnimation(0);
                 break;
             }
@@ -69,4 +73,24 @@ void PlayerController::onUpdate(float delta) {
     auto& rigid = m_Owner.getComponent<Engine::Components::RigidbodyComponent>();
     rigid.velocity = direction;
 
+    updateInteractorPos();
+}
+
+void PlayerController::updateInteractorPos() {
+    auto ent = getEntityByName("playerInteractor");
+    auto& trans = ent.getComponent<Engine::Components::ColiderComponent>();
+    switch (facing) {
+    case N:
+        trans.plot = { 11.0, 6.0, 10.0, 12.0 };
+        break;
+    case E:
+        trans.plot = { 23.0, 18.0, 10.0, 10.0 };
+        break;
+    case S:
+        trans.plot = { 11.0, 30.0, 10.0, 10.0 };
+        break;
+    case W:
+        trans.plot = { -1.0, 18.0, 10.0, 10.0 };
+        break;
+    }
 }

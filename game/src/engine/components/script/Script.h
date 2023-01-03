@@ -24,6 +24,9 @@ namespace Engine {
 
 		Engine::Entity getEntityByName(std::string name);
 		std::vector<Engine::Entity> getEntitiesByTag(std::string tag);
+		inline Engine::Entity getEntityById(uint32_t id) {
+			return m_Scene->getEntityById(id);
+		}
 
 		inline float deltaTime() {
 			return m_Scene->deltaTime();

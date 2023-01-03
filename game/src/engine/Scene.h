@@ -26,6 +26,7 @@ namespace Engine {
 			m_RigidMganager = std::move(other.m_RigidMganager);
 			m_BackgroundColor = other.m_BackgroundColor;
 			m_TimeScale = other.m_TimeScale;
+			m_NextEntId = other.m_NextEntId;
 
 			other.m_Renderer2D = nullptr;
 			other.m_RendererUI = nullptr;
@@ -42,6 +43,7 @@ namespace Engine {
 				m_RigidMganager = std::move(other.m_RigidMganager);
 				m_BackgroundColor = other.m_BackgroundColor;
 				m_TimeScale = other.m_TimeScale;
+				m_NextEntId = other.m_NextEntId;
 
 				other.m_Renderer2D = nullptr;
 				other.m_RendererUI = nullptr;
@@ -55,6 +57,7 @@ namespace Engine {
 		Entity createEntity(std::string name = std::string());
 		void removeEntity(Entity& e);
 		Entity getEntityByName(std::string name);
+		Entity getEntityById(uint32_t id);
 		std::vector<Engine::Entity> getEntitiesByTag(std::string tag);
 
 		void update();
