@@ -58,7 +58,7 @@ void Engine::Renderer::Renderer2D::render(entt::registry* registry) {
 		}
 
 		//render coliders -- debug
-		
+		/*
 		registry->view<Engine::Components::ColiderComponent>().each([&](auto ent, Engine::Components::ColiderComponent& colider) {
 			Engine::Entity e = { ent, registry };
 			auto pos = getAbsoluteTransform(e);
@@ -69,6 +69,7 @@ void Engine::Renderer::Renderer2D::render(entt::registry* registry) {
 				c ={ 0, 255, 0, 30 };
 			DrawRectangle(pos.Position.x + colider.plot.x, pos.Position.y + colider.plot.y, colider.plot.width, colider.plot.height, c);
 		});
+		*/
 		
 
 		EndMode2D();

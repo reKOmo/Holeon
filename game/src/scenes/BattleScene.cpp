@@ -97,14 +97,15 @@ void createBattleScene(Engine::Scene& scene) {
 
     EntityStats* opponentStats = scene.m_GlobalStorage->emplace<EntityStats>("opponentStats");
     opponentStats->name = "Rat";
+    opponentStats->level = 8 + Engine::rand() * 5.0;
     opponentStats->currentWeapon.attacks[0] = {
         "Slash",
-        2.0,
+        3.0f + 2.0f * Engine::rand(),
         Attack::DAMAGE
     };
     opponentStats->currentWeapon.attacks[1] = {
         "Boost",
-        0.2,
+        0.3,
         Attack::ATK_BOOST
     };
 

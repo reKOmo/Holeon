@@ -271,6 +271,10 @@ void BattleUIPlayer::createWeaponButtons() {
 			buttons.push_back(button);
 		}
 
+		if (weapons.size() == 0) {
+			uiMgrData.currentButton = {};
+		}
+
 		return battleUI;
 	});
 }
@@ -358,6 +362,9 @@ void BattleUIPlayer::createItemButtons() {
 			else {
 				totalSkipped++;
 			}
+		}
+		if (weapons.size() == totalSkipped) {
+			uiMgrData.currentButton = {};
 		}
 
 		return battleUI;

@@ -38,7 +38,7 @@ namespace Engine {
 		getComponent<Engine::Components::InfoComponent>().disabled = false;
 		for (auto& ent : getChildren()) {
 			ent.enable();
-		}
+		} 
 	}
 
 	std::vector<Engine::Entity> Entity::getChildren() {

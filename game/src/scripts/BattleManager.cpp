@@ -53,6 +53,7 @@ void BattleManager::playerTurn() {
 			playerPickedAction = actionType;
 			battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 300.0;
 			showingPlayerUI = false;
+			opponentPickedAtk = (int)(Engine::rand() * 1.4);
 			state = DEAL_DAMAGE;
 		});
 		showingPlayerUI = true;
@@ -299,8 +300,14 @@ int BattleManager::dealDamage(EntityStats* attacker, int attackIndex, EntityStat
 	totalDamage /= defender->baseDefence / 0.8;
 
 	//deal damage
-	defender->health -= totalDamage;
-	return ret;
+	if (attacker->currentWeapon.attacks[attackIndex].type == Attack::DAMAGE) {
+		defender->health -= totalDamage;
+		return ret;
+
+	} else if (attacker->currentWeapon.attacks[attackIndex] == Attack::ATK_BOOST) {
+		attacker->currentWeapon.stats.damageMod += totalDamage / 3.0;
+		return 11;
+	}
 }
 
 void BattleManager::damagePhase(EntityStats* atk, EntityStats* def, int pickedAttack, Engine::Entity& affectedStaDisplay, DAMAGE_TURN_STAGES nextTurn) {
