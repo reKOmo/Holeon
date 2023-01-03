@@ -27,6 +27,7 @@ int main(void) {
         RESOURCE_PATH("battle-ground.png"),
         RESOURCE_PATH("fireplace.png"),
         RESOURCE_PATH("white-screen.png"),
+        RESOURCE_PATH("chest.png"),
     };
 
     char* fonts[] = {
@@ -34,7 +35,7 @@ int main(void) {
     };
 
     Engine::Renderer::TextureManager textureMgr;
-    textureMgr.loadFiles(files, 15);
+    textureMgr.loadFiles(files, 16);
 
     Engine::Renderer::FontManager fontMgr;
     fontMgr.loadFiles(fonts, 1);

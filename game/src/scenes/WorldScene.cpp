@@ -58,6 +58,7 @@ void createWorldScene(Engine::Scene& scene) {
         EntityStats* playerStats = scene.m_GlobalStorage->emplace<EntityStats>("playerStats");
         playerStats->name = "Player";
         playerStats->xp = 330;
+        playerStats->currentWeapon.name = "Sword";
         playerStats->currentWeapon.attacks[0] = {
             "Slash",
             5.0,

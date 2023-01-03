@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "EntityStats.h"
+#include "BattlePlayerUI.h"
 
 enum BATTLE_STATE {
 	PLAYER_TURN = 0,
@@ -58,5 +59,7 @@ private:
 	void levelUpPhase();
 	void endBattlePhase();
 	void checkHealth();
-	void performPlayerAction();
+	void switchWeapon(DAMAGE_TURN_STAGES next);
+	void useItem(DAMAGE_TURN_STAGES next);
+	void performPlayerAction(DAMAGE_TURN_STAGES next);
 };

@@ -28,4 +28,7 @@ private:
 	EntityStats* playerStats = nullptr;
 	void onSelect(int val);
 	void createWeaponButtons();
+	void createAttackButtons();
+	void createItemButtons();
+	void refreshUI();
 };

@@ -6,6 +6,7 @@
 #include "StatsDisplay.h"
 #include "TempWorldData.h"
 #include "BattlePlayerUI.h"
+#include "Inventory.h"
 
 #include <format>
 
@@ -39,9 +40,13 @@ void BattleManager::onUpdate(float delta) {
 }
 
 void BattleManager::playerTurn() {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+	text.text = "Player turn";
 	auto script = playerUIManager.getComponent<Engine::Components::ScriptComponent>().instance;
 	if (script && !showingPlayerUI) {
 		auto mgr = dynamic_cast<BattleUIPlayer*>(script);
+		battleProgressDialog.getComponent<Engine::Components::TransformComponent>().Position.y = 460.0;
 		mgr->performAction([&](auto& a) {
 			auto& [actionType, value] = a;
 			playerPickedAtk = value;
@@ -117,7 +122,7 @@ void BattleManager::setupPhase() {
 
 void BattleManager::damagePhaseOne() {
 	if (firstAttacker == playerStats) {
-		damagePhase(firstAttacker, secondAttacker, playerPickedAtk, statDisplayOpponent, DAMAGE_PHASE_TWO);
+		performPlayerAction(DAMAGE_PHASE_TWO);
 	}
 	else {
 		damagePhase(firstAttacker, secondAttacker, opponentPickedAtk, statDisplayPlayer, DAMAGE_PHASE_TWO);
@@ -126,7 +131,7 @@ void BattleManager::damagePhaseOne() {
 
 void BattleManager::damagePhaseTwo() {
 	if (secondAttacker == playerStats) {
-		damagePhase(secondAttacker, firstAttacker, playerPickedAtk, statDisplayOpponent, END_ROUND);
+		performPlayerAction(END_ROUND);
 	}
 	else {
 		damagePhase(secondAttacker, firstAttacker, opponentPickedAtk, statDisplayPlayer, END_ROUND);
@@ -214,8 +219,63 @@ void BattleManager::checkHealth() {
 	}
 }
 
-void BattleManager::performPlayerAction() {
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!
+void BattleManager::switchWeapon(DAMAGE_TURN_STAGES next) {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+
+	auto& pickedWeapon = getGlobalStorage().get<Inventory>("inventory")->weapons[playerPickedAtk];
+
+	auto tmp = playerStats->currentWeapon;
+	playerStats->currentWeapon = pickedWeapon;
+	auto& weapons = getGlobalStorage().get<Inventory>("inventory")->weapons;
+	weapons.erase(weapons.begin() + playerPickedAtk);
+	weapons.push_back(tmp);
+
+
+	text.text = playerStats->name + " switched to " + playerStats->currentWeapon.name;
+	waitingForAccept = true;
+	currentDamageStage = next;
+}
+
+void BattleManager::useItem(DAMAGE_TURN_STAGES next) {
+	auto& children = battleProgressDialog.getChildren();
+	auto& text = children[0].getComponent<Engine::Components::TextComponent>();
+
+	auto& items = getGlobalStorage().get<Inventory>("inventory")->items;
+
+	text.text = playerStats->name + " used " + items[playerPickedAtk].name;
+
+	if (items[playerPickedAtk].type == Attack::HEAL) {
+		playerStats->health = std::min(playerStats->health + items[playerPickedAtk].value, playerStats->maxHelath);
+		auto mgr = dynamic_cast<StatsDisplay*>(statDisplayPlayer.getComponent<Engine::Components::ScriptComponent>().instance);
+		mgr->updateHp([&, next]() {
+			waitingForAccept = true;
+			currentDamageStage = next;
+		});
+		currentDamageStage = INVALID;
+	}
+	else if (items[playerPickedAtk].type == Attack::SPD_BOOST) {
+		playerStats->currentWeapon.stats.speedMod += items[playerPickedAtk].value;
+		waitingForAccept = true;
+		currentDamageStage = next;
+	}
+
+	items[playerPickedAtk].amout--;
+}
+
+void BattleManager::performPlayerAction(DAMAGE_TURN_STAGES next) {
+	switch (playerPickedAction)
+	{
+	case Player::DEAL_DAMAGE:
+		damagePhase(playerStats, opponentStats, playerPickedAtk, statDisplayOpponent, next);
+		break;
+	case Player::SWITCH_WEAPON:
+		switchWeapon(next);
+		break;
+	case Player::USE_ITEM:
+		useItem(next);
+		break;
+	}
 }
 
 /*
@@ -240,7 +300,6 @@ int BattleManager::dealDamage(EntityStats* attacker, int attackIndex, EntityStat
 
 	//deal damage
 	defender->health -= totalDamage;
-	printf("Health: %f\n", defender->health);
 	return ret;
 }
 

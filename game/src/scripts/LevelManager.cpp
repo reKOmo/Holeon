@@ -3,6 +3,7 @@
 #include "TempWorldData.h"
 #include "Fireplace.h"
 #include "Inventory.h"
+#include "Chest.h"
 
 #include "json.hpp"
 using json = nlohmann::json;
@@ -54,9 +55,25 @@ Engine::Entity createNest(Engine::Scene* scene) {
 	triggerTrans.Position = { 11.0, 28.0 };
 	auto& triggerColider = nesttrigger.addComponent<Engine::Components::ColiderComponent>();
 	triggerColider.plot = { 0.0, 0.0, 12.0, 20.0 };
+	colider.plot = { 4.0, 20.0, 26.0, 12.0 };
 	triggerColider.trigger = true;
 	nesttrigger.addComponent<Engine::Components::ScriptComponent>().bind<NestTrap>();
 	nesttrigger.setParent(nest);
+
+	return nest;
+}
+
+Engine::Entity createChest(Engine::Scene* scene) {
+	auto nest = scene->createEntity("chest");
+	auto& info = nest.getComponent<Engine::Components::InfoComponent>();
+	info.tags.push_back("interactable");
+	nest.addComponent<Engine::Components::TransformComponent>();
+	Engine::Renderer::Material mat = { scene->m_TextureManager->getTexture(15), {0.0, 0.0, 32.0, 32.0} };
+	nest.addComponent<Engine::Components::SpriteComponent>(mat);
+	auto& colider = nest.addComponent<Engine::Components::ColiderComponent>();
+	colider.plot = { 6.0, 15.0, 22.0, 17.0 };
+	nest.addComponent<Engine::Components::RigidbodyComponent>();
+	nest.addComponent<Engine::Components::ScriptComponent>().bind<Chest>();
 
 	return nest;
 }
@@ -106,9 +123,17 @@ void LevelManager::onCreate() {
 					auto& trans = ent.getComponent<Engine::Components::TransformComponent>();
 					trans.Position = { ob["x"].get<float>(), ob["y"].get<float>() - ob["height"].get<float>() };
 				}
-			}else if (layer["name"] == "fireplaces") {
+			}
+			else if (layer["name"] == "fireplaces") {
 				for (auto& ob : layer["objects"]) {
 					auto ent = Instattiate(createFireplace);
+					auto& trans = ent.getComponent<Engine::Components::TransformComponent>();
+					trans.Position = { ob["x"].get<float>(), ob["y"].get<float>() - ob["height"].get<float>() };
+				}
+			}
+			else if (layer["name"] == "chests") {
+				for (auto& ob : layer["objects"]) {
+					auto ent = Instattiate(createChest);
 					auto& trans = ent.getComponent<Engine::Components::TransformComponent>();
 					trans.Position = { ob["x"].get<float>(), ob["y"].get<float>() - ob["height"].get<float>() };
 				}

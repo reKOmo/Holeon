@@ -123,6 +123,29 @@
         }, 
         {
          "draworder":"topdown",
+         "id":6,
+         "name":"chests",
+         "objects":[
+                {
+                 "class":"",
+                 "gid":104,
+                 "height":32,
+                 "id":29,
+                 "name":"",
+                 "rotation":0,
+                 "visible":true,
+                 "width":32,
+                 "x":638,
+                 "y":366.666666666667
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":2,
          "name":"grass",
          "objects":[
@@ -348,8 +371,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":29,
+ "nextlayerid":7,
+ "nextobjectid":30,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
